@@ -284,24 +284,5 @@ def _resolve_by_custom_strategy(self, table_name, record_id, db_name, reference_
 - ✅ 响应式用户界面
 - ✅ 邮件通知系统
 
-## 🤝 贡献指南
 
-1. Fork 项目
-2. 创建功能分支
-3. 提交更改
-4. 推送到分支
-5. 创建 Pull Request
 
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
-## 📞 联系方式
-
-- 项目维护者: [您的姓名]
-- 邮箱: [您的邮箱]
-- 项目地址: [项目仓库地址]
-
----
-
-**医院挂号管理系统** - 让医疗服务更高效 🏥✨
