@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>医生界面 - 医院挂号系统</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/booking-style.css">
+    <link rel="stylesheet" href="assets/responsive.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- 消息提示 -->
+    <div id="message" class="alert" style="display: none;"></div>
+
+    <!-- 移动端菜单按钮 -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </button>
+
+    <!-- 侧边栏遮罩层 -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="admin-layout">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>医院挂号系统</h2>
+                <p class="sidebar-subtitle">医生端</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="showSection('dashboard')">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">系统概览</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('schedule')">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-text">排班日程</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('patients')">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">患者管理</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('profile')">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">个人信息</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <span class="user-icon">👨‍⚕️</span>
+                    <div class="user-details">
+                        <div class="user-name" id="username"></div>
+                        <div class="user-role">医生</div>
+                    </div>
+                </div>
+                
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 系统概览 -->
+            <div id="section-dashboard" class="content-section active">
+                <!-- 个人统计 -->
+                <div class="card">
+                    <h2>个人统计</h2>
+                    <div class="grid grid-4">
+                        <div class="stats-card">
+                            <h3 id="totalMyPatients">0</h3>
+                            <p>总患者数</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3 id="totalMyRegistrations">0</h3>
+                            <p>总挂号数</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3 id="myActiveRegistrations">0</h3>
+                            <p>待就诊</p>
+                        </div>
+                        <div class="stats-card">
+                            <h3 id="myCompletedRegistrations">0</h3>
+                            <p>已完成</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 挂号趋势 -->
+                <div class="card" style="flex: 1; display: flex; flex-direction: column;">
+                    <h2>我的挂号趋势（最近30天）</h2>
+                    <div class="chart-container" style="flex: 1; min-height: 400px; position: relative;">
+                        <canvas id="myTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 排班日程 -->
+            <div id="section-schedule" class="content-section">
+                <div class="card">
+                    <h2>我的排班日程</h2>
+                    
+                    <div class="schedule-table-container">
+                        <table class="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th>时段</th>
+                                    <th>周一</th>
+                                    <th>周二</th>
+                                    <th>周三</th>
+                                    <th>周四</th>
+                                    <th>周五</th>
+                                    <th>周六</th>
+                                    <th>周日</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>上午</strong><br><small>08:00-12:00</small></td>
+                                    <td id="monday_am"></td>
+                                    <td id="tuesday_am"></td>
+                                    <td id="wednesday_am"></td>
+                                    <td id="thursday_am"></td>
+                                    <td id="friday_am"></td>
+                                    <td id="saturday_am"></td>
+                                    <td id="sunday_am"></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>下午</strong><br><small>14:00-18:00</small></td>
+                                    <td id="monday_pm"></td>
+                                    <td id="tuesday_pm"></td>
+                                    <td id="wednesday_pm"></td>
+                                    <td id="thursday_pm"></td>
+                                    <td id="friday_pm"></td>
+                                    <td id="saturday_pm"></td>
+                                    <td id="sunday_pm"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="schedule-legend">
+                        <div class="legend-item">
+                            <div class="legend-box available"></div>
+                            <span>上班</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box unavailable"></div>
+                            <span>休息</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 患者管理 -->
+            <div id="section-patients" class="content-section">
+                <!-- 搜索患者 -->
+                <div class="card">
+            <h2>搜索患者</h2>
+            <div class="grid grid-3">
+                <div class="form-group">
+                    <label for="searchName">患者姓名</label>
+                    <input type="text" id="searchName" class="form-control" placeholder="输入患者姓名">
+                </div>
+                <div class="form-group">
+                    <label for="searchPhone">手机号码</label>
+                    <input type="text" id="searchPhone" class="form-control" placeholder="输入手机号码">
+                </div>
+                <div class="form-group">
+                    <label for="searchRegId">挂号ID</label>
+                    <input type="text" id="searchRegId" class="form-control" placeholder="输入挂号ID">
+                </div>
+            </div>
+                    <button class="btn btn-primary" onclick="searchPatients()">搜索</button>
+                    <button class="btn btn-secondary" onclick="clearSearch()">清空</button>
+                </div>
+
+                <!-- 患者列表 -->
+                <div class="card">
+            <div class="flex justify-between align-center mb-2">
+                <h2>患者列表</h2>
+                <div>
+                    <button class="btn btn-secondary btn-sm" onclick="filterByTime('active')" id="filterActive">待就诊</button>
+                    <button class="btn btn-secondary btn-sm" onclick="filterByTime('completed')" id="filterCompleted">历史记录</button>
+                    <button class="btn btn-secondary btn-sm" onclick="filterByTime('today')" id="filterToday">今天</button>
+                    <button class="btn btn-secondary btn-sm" onclick="filterByTime('all')" id="filterAll">全部</button>
+                </div>
+            </div>
+            
+            <div class="loading" id="patientsLoading">
+                <div class="spinner"></div>
+            </div>
+            
+            <div id="patientsContainer" style="display: none;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>挂号ID</th>
+                            <th>患者姓名</th>
+                            <th>联系电话</th>
+                            <th>预约时间</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsTable">
+                    </tbody>
+                </table>
+                <div id="noPatients" style="display: none; text-align: center; padding: 2rem; color: #666;">
+                    暂无患者记录
+                </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- 个人信息 -->
+            <div id="section-profile" class="content-section">
+                <div class="card" style="max-width: 800px; margin: 0 auto;">
+                    <h2>个人信息</h2>
+                    
+                    <!-- 照片上传区域 -->
+                    <div style="text-align: center; margin-bottom: 2rem; padding: 2rem; background: #f8f9fa; border-radius: 8px;">
+                        <div style="margin-bottom: 1rem;">
+                            <img id="doctorPhotoPreview" src="" alt="医生照片" style="width: 180px; height: 240px; border-radius: 8px; object-fit: contain; border: 2px solid #e0e0e0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); background: white;">
+                        </div>
+                        <input type="file" id="photoInput" accept="image/*" style="display: none;" onchange="previewPhoto(event)">
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('photoInput').click()">选择照片</button>
+                        <button type="button" class="btn btn-primary" onclick="uploadPhoto()" id="uploadPhotoBtn" style="display: none;">上传照片</button>
+                        <p style="margin-top: 0.5rem; font-size: 0.85rem; color: #666;">
+                            <strong>要求：</strong><br>
+                            • 格式：JPG、PNG、GIF<br>
+                            • 比例：3:4（竖版）<br>
+                            • 尺寸：300×400 至 2000×2667 像素<br>
+                            • 推荐：600×800 或 900×1200 像素<br>
+                            • 大小：不超过 2MB
+                        </p>
+                    </div>
+                    
+                    <form id="profileForm" onsubmit="updateProfile(event)">
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label for="profileName">姓名 *</label>
+                                <input type="text" id="profileName" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileTitle">职称</label>
+                                <input type="text" id="profileTitle" class="form-control" readonly style="background-color: #f5f5f5;">
+                                <small class="text-muted">职称由管理员统一管理</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="profileDept">所属科室</label>
+                            <input type="text" id="profileDept" class="form-control" readonly style="background-color: #f5f5f5;">
+                        </div>
+                        
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label for="profilePassword">新密码（留空则不修改）</label>
+                                <input type="password" id="profilePassword" class="form-control" placeholder="如需修改密码请输入新密码">
+                            </div>
+                            <div class="form-group">
+                                <label for="profilePasswordConfirm">确认新密码</label>
+                                <input type="password" id="profilePasswordConfirm" class="form-control" placeholder="再次输入新密码">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">保存修改</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 患者详情模态框 -->
+    <div id="patientModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>患者详情</h3>
+                <span class="close" onclick="closePatientModal()">&times;</span>
+            </div>
+            <div id="patientDetails"></div>
+            <div style="text-align: right; margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="closePatientModal()">关闭</button>
+                <button class="btn btn-success" id="completeBtn" onclick="markCompleted()">标记已就诊</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/config.js"></script>
+    <script>
+        let allRegistrations = [];
+        let filteredRegistrations = [];
+        let currentFilter = 'all';
+        let currentPatientId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!localStorage.getItem('token') || localStorage.getItem('role') !== 'doctor') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Set username
+            document.getElementById('username').textContent = localStorage.getItem('username');
+
+            // Load initial data
+            loadDoctorStats();
+            loadDoctorTrend();
+            loadPatients();
+
+            // Set up search event listeners
+            document.getElementById('searchName').addEventListener('input', debounce(searchPatients, 500));
+            document.getElementById('searchPhone').addEventListener('input', debounce(searchPatients, 500));
+            document.getElementById('searchRegId').addEventListener('input', debounce(searchPatients, 500));
+        });
+
+        function showSection(sectionName) {
+            // 隐藏所有内容区域
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 移除所有导航项的active类
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 显示选中的内容区域
+            document.getElementById(`section-${sectionName}`).classList.add('active');
+            
+            // 高亮选中的导航项
+            event.target.closest('.nav-item').classList.add('active');
+            
+            // 加载对应数据
+            if (sectionName === 'dashboard') {
+                loadDoctorStats();
+                loadDoctorTrend();
+            } else if (sectionName === 'schedule') {
+                loadDoctorSchedule();
+            } else if (sectionName === 'patients') {
+                loadPatients();
+            } else if (sectionName === 'profile') {
+                loadProfile();
+            }
+        }
+
+        async function loadDoctorSchedule() {
+            try {
+                const response = await apiRequest('/doctor/schedule');
+                const schedule = response.schedule || {};
+                
+                // 所有时段
+                const slots = [
+                    'monday_am', 'monday_pm',
+                    'tuesday_am', 'tuesday_pm',
+                    'wednesday_am', 'wednesday_pm',
+                    'thursday_am', 'thursday_pm',
+                    'friday_am', 'friday_pm',
+                    'saturday_am', 'saturday_pm',
+                    'sunday_am', 'sunday_pm'
+                ];
+                
+                // 填充排班表
+                slots.forEach(slot => {
+                    const cell = document.getElementById(slot);
+                    if (cell) {
+                        const isAvailable = schedule[slot] === true;
+                        cell.innerHTML = `<span class="schedule-slot ${isAvailable ? 'available' : 'unavailable'}">${isAvailable ? '上班' : '休息'}</span>`;
+                    }
+                });
+            } catch (error) {
+                showMessage('加载排班信息失败: ' + error.message, 'danger');
+            }
+        }
+
+        async function loadPatients() {
+            const loading = document.getElementById('patientsLoading');
+            const container = document.getElementById('patientsContainer');
+            
+            loading.style.display = 'flex';
+            container.style.display = 'none';
+
+            try {
+                allRegistrations = await apiRequest('/doctor/registrations');
+                filteredRegistrations = [...allRegistrations];
+                
+                displayPatients();
+                container.style.display = 'block';
+            } catch (error) {
+                showMessage('加载患者数据失败: ' + error.message, 'danger');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        async function searchPatients() {
+            const name = document.getElementById('searchName').value.trim();
+            const phone = document.getElementById('searchPhone').value.trim();
+            const regId = document.getElementById('searchRegId').value.trim();
+
+            if (!name && !phone && !regId) {
+                filteredRegistrations = [...allRegistrations];
+                filterByTime('all');
+                return;
+            }
+
+            try {
+                const params = new URLSearchParams();
+                if (name) params.append('patient_name', name);
+                if (phone) params.append('phone', phone);
+                if (regId) params.append('reg_id', regId);
+
+                filteredRegistrations = await apiRequest(`/doctor/search?${params.toString()}`);
+                filterByTime('all');
+            } catch (error) {
+                showMessage('搜索失败: ' + error.message, 'danger');
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchName').value = '';
+            document.getElementById('searchPhone').value = '';
+            document.getElementById('searchRegId').value = '';
+            filteredRegistrations = [...allRegistrations];
+            filterByTime('all');
+        }
+
+        function filterByTime(filter) {
+            currentFilter = filter;
+            
+            // Update button styles
+            document.querySelectorAll('[id^="filter"]').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            const buttonMap = {
+                'active': 'filterActive',
+                'completed': 'filterCompleted', 
+                'today': 'filterToday',
+                'all': 'filterAll'
+            };
+            document.getElementById(buttonMap[filter]).classList.remove('btn-secondary');
+            document.getElementById(buttonMap[filter]).classList.add('btn-primary');
+
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+
+            let filtered = [...filteredRegistrations];
+
+            switch (filter) {
+                case 'active':
+                    // 显示所有未完成的挂号（registered状态）
+                    filtered = filtered.filter(reg => reg.status === 'registered');
+                    break;
+                case 'completed':
+                    // 显示所有已完成和已过号的挂号（历史记录）
+                    filtered = filtered.filter(reg => reg.status === 'completed' || reg.status === 'cancelled');
+                    break;
+                case 'today':
+                    filtered = filtered.filter(reg => {
+                        const regDate = new Date(reg.reg_time);
+                        return regDate >= today && regDate < tomorrow;
+                    });
+                    break;
+                case 'all':
+                default:
+                    // No filtering needed
+                    break;
+            }
+
+            displayPatients(filtered);
+        }
+
+        function displayPatients(registrations = filteredRegistrations) {
+            const tbody = document.getElementById('patientsTable');
+            const noPatients = document.getElementById('noPatients');
+            
+            tbody.innerHTML = '';
+            
+            if (registrations.length === 0) {
+                noPatients.style.display = 'block';
+            } else {
+                noPatients.style.display = 'none';
+                
+                // Sort by appointment time
+                registrations.sort((a, b) => new Date(a.reg_time) - new Date(b.reg_time));
+                
+                registrations.forEach(reg => {
+                    const row = document.createElement('tr');
+                    const regTime = new Date(reg.reg_time);
+                    const now = new Date();
+                    // 只能标记当前时间或过去时间的registered挂号为已就诊
+                    const canComplete = reg.status === 'registered' && regTime <= now;
+                    
+                    row.innerHTML = `
+                        <td>${reg.reg_id}</td>
+                        <td>${reg.patient_name}</td>
+                        <td>${reg.patient_phone || '未提供'}</td>
+                        <td>${formatDateTime(reg.reg_time)}</td>
+                        <td><span class="status-badge status-${reg.status}">${getStatusText(reg.status)}</span></td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm" onclick="showPatientDetails(${reg.reg_id})">详情</button>
+                            ${canComplete ? 
+                                `<button class="btn btn-success btn-sm" onclick="markCompletedDirect(${reg.reg_id})">标记已就诊</button>` : 
+                                ''
+                            }
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+
+        function showPatientDetails(regId) {
+            const registration = allRegistrations.find(reg => reg.reg_id === regId);
+            if (!registration) return;
+
+            currentPatientId = regId;
+            const modal = document.getElementById('patientModal');
+            const details = document.getElementById('patientDetails');
+            const completeBtn = document.getElementById('completeBtn');
+
+            details.innerHTML = `
+                <div class="form-group">
+                    <strong>挂号ID:</strong> ${registration.reg_id}
+                </div>
+                <div class="form-group">
+                    <strong>患者姓名:</strong> ${registration.patient_name}
+                </div>
+                <div class="form-group">
+                    <strong>联系电话:</strong> ${registration.patient_phone || '未提供'}
+                </div>
+                <div class="form-group">
+                    <strong>预约时间:</strong> ${formatDateTime(registration.reg_time)}
+                </div>
+                <div class="form-group">
+                    <strong>挂号时间:</strong> ${formatDateTime(registration.created_at)}
+                </div>
+                <div class="form-group">
+                    <strong>状态:</strong> <span class="status-badge status-${registration.status}">${getStatusText(registration.status)}</span>
+                </div>
+            `;
+
+            completeBtn.style.display = registration.status === 'registered' ? 'inline-block' : 'none';
+            modal.style.display = 'block';
+        }
+
+        function closePatientModal() {
+            document.getElementById('patientModal').style.display = 'none';
+            currentPatientId = null;
+        }
+
+        async function markCompleted() {
+            if (!currentPatientId) return;
+            await markCompletedDirect(currentPatientId);
+            closePatientModal();
+        }
+
+        async function markCompletedDirect(regId) {
+            try {
+                // Find the registration in the current view
+                const registration = allRegistrations.find(reg => reg.reg_id === regId);
+                if (!registration) {
+                    throw new Error('未找到该挂号记录');
+                }
+
+                // Check if the appointment is today
+                const regTime = new Date(registration.reg_time);
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+                
+                // Check if the appointment is in the future (not today)
+                if (regTime >= tomorrow) {
+                    showMessage('就诊时间未到，无法标记为已就诊', 'warning');
+                    return;
+                }
+
+                // Proceed with marking as completed
+                await apiRequest(`/registrations/${regId}/complete`, {
+                    method: 'POST'
+                });
+
+                showMessage('已标记为已就诊', 'success');
+                // Only reload the patients list, not the stats
+                const patientsContainer = document.getElementById('patientsContainer');
+                patientsContainer.style.display = 'none';
+                await loadPatients();
+            } catch (error) {
+                showMessage('操作失败: ' + (error.message || '未知错误'), 'danger');
+            }
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'registered': '已挂号',
+                'completed': '已就诊',
+                'cancelled': '已过号'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatDateTime(dateTimeStr) {
+            const date = new Date(dateTimeStr);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = `alert alert-${type} message`;
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // 移动端菜单控制
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // 点击导航项后自动关闭移动端菜单
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        async function loadDoctorStats() {
+            try {
+                const stats = await apiRequest('/doctor/stats');
+                document.getElementById('totalMyPatients').textContent = stats.total_patients;
+                document.getElementById('totalMyRegistrations').textContent = stats.total_registrations;
+                document.getElementById('myActiveRegistrations').textContent = stats.active_registrations;
+                document.getElementById('myCompletedRegistrations').textContent = stats.completed_registrations;
+            } catch (error) {
+                console.error('加载统计失败:', error);
+            }
+        }
+
+        let myTrendChart = null;
+        async function loadDoctorTrend() {
+            try {
+                const trendData = await apiRequest('/doctor/trend');
+                
+                if (myTrendChart) myTrendChart.destroy();
+                
+                const ctx = document.getElementById('myTrendChart').getContext('2d');
+                myTrendChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: trendData.labels,
+                        datasets: [{
+                            label: '挂号数量',
+                            data: trendData.data,
+                            borderColor: '#36A2EB',
+                            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#36A2EB',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `挂号数量: ${context.parsed.y}人`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: { size: 12 }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: { size: 12 }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('加载趋势图失败:', error);
+            }
+        }
+
+        async function loadProfile() {
+            try {
+                const profile = await apiRequest('/doctor/profile');
+                document.getElementById('profileName').value = profile.name || '';
+                document.getElementById('profileTitle').value = profile.title || '未设置';
+                document.getElementById('profileDept').value = profile.dept_name || '';
+                document.getElementById('profilePassword').value = '';
+                document.getElementById('profilePasswordConfirm').value = '';
+                
+                // 加载并显示当前医生照片
+                const photoPreview = document.getElementById('doctorPhotoPreview');
+                
+                console.log('Profile photo:', profile.photo); // 调试信息
+                
+                // 创建占位图SVG
+                const placeholderSvg = `data:image/svg+xml,%3Csvg width='180' height='240' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='180' height='240' fill='%23f8f9fa'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='16' fill='%23999' text-anchor='middle' dy='.3em'%3E医生照片%3C/text%3E%3C/svg%3E`;
+                
+                if (profile.photo) {
+                    // 有照片：尝试加载实际照片
+                    const photoUrl = `${API_BASE_URL.replace('/api', '')}/uploads/${profile.photo}`;
+                    console.log('Loading photo from:', photoUrl); // 调试信息
+                    
+                    photoPreview.src = photoUrl;
+                    
+                    // 添加图片加载错误处理
+                    photoPreview.onerror = function() {
+                        console.error('Photo load failed, showing placeholder'); // 调试信息
+                        this.src = placeholderSvg;
+                        this.onerror = null; // 防止无限循环
+                    };
+                    
+                    photoPreview.onload = function() {
+                        console.log('Photo loaded successfully'); // 调试信息
+                    };
+                } else {
+                    // 无照片：直接显示占位图
+                    console.log('No photo, showing placeholder'); // 调试信息
+                    photoPreview.src = placeholderSvg;
+                }
+            } catch (error) {
+                showMessage('加载个人信息失败', 'danger');
+            }
+        }
+
+        let selectedPhotoFile = null;
+
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // 验证文件大小
+            if (file.size > 2 * 1024 * 1024) {
+                showMessage('文件大小不能超过2MB', 'warning');
+                event.target.value = '';
+                return;
+            }
+            
+            // 验证文件类型
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                showMessage('只支持 PNG、JPG、JPEG、GIF 格式的图片', 'warning');
+                event.target.value = '';
+                return;
+            }
+            
+            // 预览图片并验证比例和尺寸
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    // 验证图片尺寸
+                    const minWidth = 300;
+                    const minHeight = 400;
+                    const maxWidth = 2000;
+                    const maxHeight = 2667;
+                    
+                    if (img.width < minWidth || img.height < minHeight) {
+                        showMessage(`照片尺寸太小！最小尺寸为${minWidth}×${minHeight}像素，当前为${img.width}×${img.height}像素。`, 'warning');
+                        event.target.value = '';
+                        return;
+                    }
+                    
+                    if (img.width > maxWidth || img.height > maxHeight) {
+                        showMessage(`照片尺寸太大！最大尺寸为${maxWidth}×${maxHeight}像素，当前为${img.width}×${img.height}像素。`, 'warning');
+                        event.target.value = '';
+                        return;
+                    }
+                    
+                    // 计算图片比例
+                    const ratio = img.width / img.height;
+                    const targetRatio = 3 / 4; // 0.75
+                    const tolerance = 0.1; // 允许10%的误差
+                    
+                    // 验证比例是否接近3:4
+                    if (Math.abs(ratio - targetRatio) > tolerance) {
+                        showMessage('照片比例应为3:4（竖版），例如600×800像素。当前比例不符合要求。', 'warning');
+                        event.target.value = '';
+                        return;
+                    }
+                    
+                    // 尺寸和比例都符合，显示预览
+                    selectedPhotoFile = file;
+                    document.getElementById('doctorPhotoPreview').src = e.target.result;
+                    document.getElementById('uploadPhotoBtn').style.display = 'inline-block';
+                    showMessage(`照片符合要求（${img.width}×${img.height}像素）`, 'success');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function uploadPhoto() {
+            if (!selectedPhotoFile) {
+                showMessage('请先选择照片', 'warning');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('photo', selectedPhotoFile);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/doctor/photo`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    console.log('Upload response:', data); // 调试信息
+                    showMessage('照片上传成功！', 'success');
+                    document.getElementById('uploadPhotoBtn').style.display = 'none';
+                    selectedPhotoFile = null;
+                    
+                    // 更新预览图片为服务器返回的URL（使用与患者端相同的方式）
+                    if (data.photo) {
+                        const photoPreview = document.getElementById('doctorPhotoPreview');
+                        const photoUrl = `${API_BASE_URL.replace('/api', '')}/uploads/${data.photo}`;
+                        console.log('Updating photo to:', photoUrl); // 调试信息
+                        photoPreview.src = photoUrl;
+                    }
+                } else {
+                    console.error('Upload failed:', data); // 调试信息
+                    showMessage(data.error || '照片上传失败', 'danger');
+                }
+            } catch (error) {
+                showMessage('照片上传失败: ' + error.message, 'danger');
+            }
+        }
+
+        async function updateProfile(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('profilePassword').value;
+            const passwordConfirm = document.getElementById('profilePasswordConfirm').value;
+            
+            if (password && password !== passwordConfirm) {
+                showMessage('两次输入的密码不一致', 'warning');
+                return;
+            }
+            
+            try {
+                const data = {
+                    name: document.getElementById('profileName').value
+                };
+                
+                if (password) {
+                    data.password = password;
+                }
+                
+                await apiRequest('/doctor/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+                
+                showMessage('个人信息更新成功', 'success');
+                
+                // 更新侧边栏显示的用户名
+                document.getElementById('username').textContent = data.name;
+                localStorage.setItem('username', data.name);
+                
+                // 清空密码字段
+                document.getElementById('profilePassword').value = '';
+                document.getElementById('profilePasswordConfirm').value = '';
+            } catch (error) {
+                showMessage('更新失败: ' + error.message, 'danger');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            localStorage.removeItem('username');
+            localStorage.removeItem('user_id');
+            window.location.href = 'login.html';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('patientModal');
+            if (event.target === modal) {
+                closePatientModal();
+            }
+        }
+
+
+        // Initialize filter to show all appointments by default
+        filterByTime('all');
+    </script>
+</body>
+</html>

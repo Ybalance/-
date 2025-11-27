@@ -1,0 +1,4010 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员界面 - 医院挂号系统</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/responsive.css">
+    <link rel="stylesheet" href="assets/refresh-styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* 数据库管理样式 */
+        .db-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .table-info {
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .table-responsive {
+            overflow-x: auto;
+            max-height: 600px;
+        }
+        .pagination {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .pagination .btn {
+            min-width: 40px;
+        }
+        #dataTable {
+            font-size: 11px;
+            table-layout: fixed;
+            width: 100%;
+        }
+        #dataTable th {
+            position: sticky;
+            top: 0;
+            background: #f8f9fa !important;
+            z-index: 10;
+            box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+            font-size: 12px;
+            padding: 8px 8px !important;
+            text-align: center;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: bold;
+        }
+        #dataTable td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 6px 8px !important;
+            font-size: 11px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        #dataTable tr:hover {
+            background-color: #f8f9fa;
+        }
+        #dataTable .btn-sm {
+            font-size: 10px;
+            padding: 2px 6px;
+            margin: 0 1px;
+        }
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        /* 移动端响应式设计 */
+        @media (max-width: 768px) {
+            /* 侧边栏适配 */
+            .sidebar {
+                width: 100% !important;
+                height: auto !important;
+                position: relative !important;
+                transform: none !important;
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+                padding: 10px !important;
+            }
+            
+            /* 导航栏适配 */
+            .nav-item {
+                padding: 8px 12px !important;
+                font-size: 14px !important;
+            }
+            
+            .nav-text {
+                display: inline !important;
+            }
+            
+            /* 卡片适配 */
+            .card {
+                margin: 10px 0 !important;
+                padding: 15px !important;
+            }
+            
+            /* 表格适配 */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            #dataTable {
+                min-width: 600px;
+                font-size: 10px !important;
+            }
+            
+            #dataTable th {
+                padding: 6px 4px !important;
+                font-size: 10px !important;
+            }
+            
+            #dataTable td {
+                padding: 4px 4px !important;
+                font-size: 9px !important;
+            }
+            
+            #dataTable .btn-sm {
+                font-size: 8px !important;
+                padding: 1px 4px !important;
+                margin: 0 1px !important;
+            }
+            
+            /* 按钮适配 */
+            .btn {
+                padding: 8px 12px;
+                font-size: 14px;
+                margin: 2px;
+            }
+            
+            .btn-group {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+            
+            /* 表单适配 */
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            .form-control {
+                font-size: 16px; /* 防止iOS缩放 */
+                padding: 12px;
+            }
+            
+            /* 数据库选择器适配 */
+            .db-selector {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .db-selector .btn-group {
+                justify-content: center;
+            }
+            
+            /* 统计卡片适配 */
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 10px !important;
+            }
+            
+            .stat-card {
+                padding: 15px !important;
+            }
+            
+            .stat-value {
+                font-size: 24px !important;
+            }
+            
+            /* 图表适配 */
+            .chart-container {
+                height: 250px !important;
+                margin: 10px 0;
+            }
+            
+            /* 模态框适配 */
+            .modal-content {
+                margin: 10px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            
+            /* 分页适配 */
+            .pagination {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 2px;
+            }
+            
+            .pagination .btn {
+                min-width: 35px;
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            
+            /* 隐藏不重要的列 */
+            .mobile-hide {
+                display: none !important;
+            }
+            
+            /* 操作按钮垂直排列 */
+            .mobile-action-vertical .btn {
+                display: block;
+                width: 100%;
+                margin: 1px 0;
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* 超小屏幕适配 */
+            .main-content {
+                padding: 5px !important;
+            }
+            
+            .card {
+                padding: 10px !important;
+                margin: 5px 0 !important;
+            }
+            
+            #dataTable {
+                min-width: 500px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .db-selector .btn {
+                width: 100%;
+                margin: 2px 0;
+            }
+        }
+        
+        /* 移动端菜单按钮样式 */
+        .mobile-menu-btn {
+            position: fixed;
+            top: 60px;
+            left: 15px;
+            z-index: 1001;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+            display: none;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-menu-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+        }
+        
+        /* 侧边栏遮罩层 */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        /* 移动端显示菜单按钮 */
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block !important;
+            }
+            
+            .sidebar {
+                position: fixed !important;
+                top: 0;
+                left: -100% !important;
+                width: 280px !important;
+                height: 100vh !important;
+                z-index: 1000;
+                transition: left 0.3s ease;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                box-shadow: 2px 0 15px rgba(0,0,0,0.2);
+                border-right: 3px solid rgba(255,255,255,0.1);
+            }
+            
+            .sidebar.mobile-open {
+                left: 0 !important;
+            }
+            
+            .sidebar-overlay.active {
+                display: block;
+            }
+            
+            /* 移动端侧边栏文字颜色 */
+            .sidebar.mobile-open .nav-item {
+                color: white !important;
+                background: rgba(255,255,255,0.1) !important;
+                border: 1px solid rgba(255,255,255,0.2) !important;
+                margin: 5px 10px !important;
+                border-radius: 8px !important;
+            }
+            
+            .sidebar.mobile-open .nav-item:hover {
+                background: rgba(255,255,255,0.2) !important;
+                transform: translateX(5px);
+            }
+            
+            .sidebar.mobile-open .nav-item.active {
+                background: rgba(255,255,255,0.3) !important;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            }
+            
+            .sidebar.mobile-open .sidebar-header h2,
+            .sidebar.mobile-open .sidebar-header p {
+                color: white !important;
+                text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+                padding-top: 80px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 消息提示 -->
+    <div id="message" class="alert" style="display: none;"></div>
+    
+    <!-- 移动端菜单按钮 -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </button>
+
+    <!-- 侧边栏遮罩层 -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    
+    <div class="admin-layout">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>医院挂号系统</h2>
+                <p class="sidebar-subtitle">管理员控制台</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="showSection('dashboard')">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">系统概览</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('departments')">
+                    <span class="nav-icon">🏥</span>
+                    <span class="nav-text">科室管理</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('titles')">
+                    <span class="nav-icon">🎖️</span>
+                    <span class="nav-text">职称管理</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('users')">
+                    <span class="nav-icon">👥</span>
+                    <span class="nav-text">用户管理</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('registrations')">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">挂号记录</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('schedule')">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-text">排班管理</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('database')">
+                    <span class="nav-icon">🗄️</span>
+                    <span class="nav-text">数据库管理</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <span class="user-icon">👤</span>
+                    <div class="user-details">
+                        <div class="user-name" id="username">admin</div>
+                        <div class="user-role">管理员</div>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </aside>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="content-header">
+                <h1 id="pageTitle">系统概览</h1>
+            </div>
+            
+            <div class="content-body">
+                <!-- 系统统计 -->
+                <div id="section-dashboard" class="content-section active">
+                    <div class="card">
+            <h2>系统统计</h2>
+            <div class="grid grid-4">
+                <div class="stats-card">
+                    <h3 id="totalPatients">0</h3>
+                    <p>总患者数</p>
+                </div>
+                <div class="stats-card">
+                    <h3 id="totalDoctors">0</h3>
+                    <p>总医生数</p>
+                </div>
+                <div class="stats-card">
+                    <h3 id="totalDepartments">0</h3>
+                    <p>科室数量</p>
+                </div>
+                <div class="stats-card">
+                    <h3 id="totalRegistrations">0</h3>
+                    <p>总挂号数</p>
+                </div>
+            </div>
+            <div class="grid grid-4 mt-2">
+                <div class="stats-card">
+                    <h3 id="activeRegistrations">0</h3>
+                    <p>待就诊挂号</p>
+                </div>
+                <div class="stats-card">
+                    <h3 id="completedRegistrations">0</h3>
+                    <p>已完成挂号</p>
+                </div>
+                <div class="stats-card">
+                    <h3 id="totalFee">¥0.00</h3>
+                    <p>累计挂号费用</p>
+                </div>
+                <div class="stats-card">
+                    <h3 id="monthlyFee">¥0.00</h3>
+                    <p>近30天费用</p>
+                </div>
+                    </div>
+                </div>
+
+                <!-- 统计图表 -->
+                <div class="card mt-2">
+                    <h2>挂号数据分析</h2>
+                    <div class="grid grid-2">
+                        <div class="chart-container">
+                            <h3 style="text-align: center; color: #666; margin-bottom: 1rem;">各科室挂号分布</h3>
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <h3 style="color: #666; margin: 0;">挂号时间趋势</h3>
+                                <button class="btn btn-secondary btn-sm" onclick="resetTimeChart()" title="重置为全部科室">
+                                    <span style="font-size: 16px;">🔄</span> 重置
+                                </button>
+                            </div>
+                            <canvas id="timeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+
+                <!-- 科室管理 -->
+                <div id="section-departments" class="content-section">
+                    <div class="card">
+            <div class="flex justify-between align-center mb-2">
+                <h2>科室管理</h2>
+                <button class="btn btn-primary" onclick="showAddDepartmentModal()">添加科室</button>
+            </div>
+            
+            <!-- 科室搜索 -->
+            <div class="search-box mb-2">
+                <input type="text" id="deptSearchInput" class="form-control" placeholder="搜索科室名称或位置..." onkeyup="searchDepartments()">
+            </div>
+            
+            <div class="loading" id="departmentsLoading">
+                <div class="spinner"></div>
+            </div>
+            
+            <div id="departmentsContainer" style="display: none;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>科室ID</th>
+                            <th>科室名称</th>
+                            <th>位置</th>
+                            <th>医生数量</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="departmentsTable">
+                    </tbody>
+                </table>
+                    </div>
+                </div>
+                </div>
+
+                <!-- 职称管理 -->
+                <div id="section-titles" class="content-section">
+                    <div class="card">
+                        <div class="flex justify-between align-center mb-2">
+                            <h2>职称管理</h2>
+                            <button class="btn btn-primary" onclick="showAddTitleModal()">添加职称</button>
+                        </div>
+                        
+                        <!-- 职称搜索 -->
+                        <div class="search-box mb-2">
+                            <input type="text" id="titleSearchInput" class="form-control" placeholder="搜索职称名称..." onkeyup="searchTitles()">
+                        </div>
+                        
+                        <div class="loading" id="titlesLoading">
+                            <div class="spinner"></div>
+                        </div>
+                        
+                        <div id="titlesContainer" style="display: none;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>职称ID</th>
+                                        <th>职称名称</th>
+                                        <th>挂号费(元)</th>
+                                        <th>使用医生数</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="titlesTable">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 用户管理 -->
+                <div id="section-users" class="content-section">
+                    <div class="card">
+            <div class="flex justify-between align-center mb-2">
+                <h2>用户管理</h2>
+                <div>
+                    <button class="btn btn-secondary btn-sm" onclick="showUserType('all')" id="showAll">全部</button>
+                    <button class="btn btn-secondary btn-sm" onclick="showUserType('patients')" id="showPatients">患者</button>
+                    <button class="btn btn-secondary btn-sm" onclick="showUserType('doctors')" id="showDoctors">医生</button>
+                    <button class="btn btn-secondary btn-sm" onclick="showUserType('admins')" id="showAdmins">管理员</button>
+                    <button class="btn btn-primary btn-sm" onclick="showAddAdminModal()" id="addAdminBtn" style="display: none;">添加管理员</button>
+                </div>
+            </div>
+            
+            <!-- 用户搜索 -->
+            <div class="search-box mb-2">
+                <input type="text" id="userSearchInput" class="form-control" placeholder="搜索用户名或姓名..." onkeyup="searchUsers()">
+            </div>
+            
+            <div class="loading" id="usersLoading">
+                <div class="spinner"></div>
+            </div>
+            
+            <div id="usersContainer" style="display: none;">
+                <table class="table">
+                    <thead id="usersTableHead">
+                    </thead>
+                    <tbody id="usersTable">
+                    </tbody>
+                </table>
+                    </div>
+                </div>
+                </div>
+
+                <!-- 挂号记录管理 -->
+                <div id="section-registrations" class="content-section">
+                    <div class="card">
+                        <h2>挂号记录管理</h2>
+                        
+                        <!-- 挂号记录搜索 -->
+                        <div class="search-box mb-2">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" id="regPatientSearch" class="form-control" placeholder="患者姓名" onkeyup="searchRegistrations()">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" id="regDoctorSearch" class="form-control" placeholder="医生姓名" onkeyup="searchRegistrations()">
+                                </div>
+                                <div class="form-group">
+                                    <select id="regStatusFilter" class="form-control" onchange="searchRegistrations()">
+                                        <option value="">全部状态</option>
+                                        <option value="registered">已挂号</option>
+                                        <option value="completed">已就诊</option>
+                                        <option value="cancelled">已过号</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="loading" id="registrationsLoading">
+                            <div class="spinner"></div>
+                        </div>
+                        
+                        <div id="registrationsContainer" style="display: none;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>挂号ID</th>
+                                        <th>患者</th>
+                                        <th>医生</th>
+                                        <th>科室</th>
+                                        <th>预约时间</th>
+                                        <th>状态</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="registrationsTable">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 排班管理 -->
+                <div id="section-schedule" class="content-section">
+                    <div class="card">
+                        <h2>医生排班管理</h2>
+                        
+                        <!-- 搜索框 -->
+                        <div class="search-box mb-2">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <input type="text" id="scheduleSearchName" class="form-control" placeholder="医生姓名" onkeyup="searchSchedule()">
+                                </div>
+                                <div class="form-group">
+                                    <select id="scheduleSearchDept" class="form-control" onchange="searchSchedule()">
+                                        <option value="">全部科室</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <select id="scheduleSearchStatus" class="form-control" onchange="searchSchedule()">
+                                        <option value="">全部状态</option>
+                                        <option value="set">已设置</option>
+                                        <option value="unset">未设置</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="loading" id="scheduleLoading">
+                            <div class="spinner"></div>
+                        </div>
+                        
+                        <div id="scheduleContainer" style="display: none;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>医生</th>
+                                        <th>职称</th>
+                                        <th>科室</th>
+                                        <th>排班状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scheduleTable">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据库管理 -->
+                <div id="section-database" class="content-section">
+                    <div class="card">
+                        <h2>数据库管理</h2>
+                        
+                        <!-- 数据库选择 -->
+                        <div class="db-selector mb-2">
+                            <div class="btn-group">
+                                <button class="btn btn-primary active" onclick="selectDatabase('sqlite')" id="btn-db-sqlite">
+                                    SQLite (主库)
+                                </button>
+                                <button class="btn btn-secondary" onclick="selectDatabase('mysql')" id="btn-db-mysql">
+                                    MySQL (从库)
+                                </button>
+                                <button class="btn btn-secondary" onclick="selectDatabase('sqlserver')" id="btn-db-sqlserver">
+                                    SQL Server (从库)
+                                </button>
+                            </div>
+                            <button class="btn btn-warning" onclick="showConflicts()" style="margin-left: auto;">
+                                🔍 查看冲突
+                            </button>
+                        </div>
+
+                        <!-- 表格选择 -->
+                        <div class="form-row mb-2">
+                            <div class="form-group" style="flex: 1;">
+                                <label>选择表格:</label>
+                                <select id="dbTableSelect" class="form-control" onchange="loadTableData()">
+                                    <option value="">请选择表格</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button class="btn btn-info" onclick="compareAllDatabases()">
+                                    对比三库数据
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 数据表格 -->
+                        <div class="loading" id="dbLoading" style="display: none;">
+                            <div class="spinner"></div>
+                        </div>
+
+                        <div id="dbTableContainer" style="display: none;">
+                            <div class="table-info mb-1">
+                                <span>当前数据库: <strong id="currentDatabase">SQLite</strong></span>
+                                <span style="margin-left: 20px;">当前表: <strong id="currentTable">-</strong></span>
+                                <span style="margin-left: 20px;">总记录数: <strong id="totalRecords">0</strong></span>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table" id="dataTable">
+                                    <thead id="dataTableHead">
+                                    </thead>
+                                    <tbody id="dataTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- 分页 -->
+                            <div class="pagination" id="dbPagination">
+                            </div>
+                        </div>
+
+                        <!-- 冲突列表 -->
+                        <div id="conflictContainer" style="display: none;">
+                            <h3>数据冲突列表</h3>
+                            <div id="conflictList"></div>
+                        </div>
+                    </div>
+
+                    <!-- 数据库同步配置 -->
+                    <div class="card" style="margin-top: 20px;">
+                        <h2>数据库同步配置</h2>
+                        
+                        <!-- 调度器状态 -->
+                        <div class="sync-status mb-2" style="padding: 15px; background: #f5f5f5; border-radius: 8px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <h3 style="margin: 0 0 10px 0;">自动同步调度器</h3>
+                                    <div style="display: flex; align-items: center; gap: 20px;">
+                                        <span>状态: <strong id="schedulerStatus" style="color: #28a745;">●</strong> <span id="schedulerStatusText">运行中</span></span>
+                                        <span>检查间隔: <strong id="currentInterval">10分钟</strong></span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <button class="btn" id="schedulerToggleBtn" onclick="toggleScheduler()">
+                                        <span id="schedulerBtnIcon">⏸</span> <span id="schedulerBtnText">暂停调度器</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 配置表单 -->
+                        <div class="form-row mb-2">
+                            <div class="form-group" style="flex: 1;">
+                                <label>自动检查间隔 (分钟):</label>
+                                <input type="number" id="checkIntervalInput" class="form-control" min="0.17" max="1440" step="0.1" value="10" placeholder="0.17-1440分钟">
+                                <small style="color: #666;">建议: 0.5-2分钟(频繁), 5-10分钟(平衡), 30分钟以上(不频繁)。最小10秒(0.17分钟)</small>
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button class="btn btn-primary" onclick="updateSyncInterval()">
+                                    💾 保存间隔设置
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 默认同步策略 -->
+                        <div class="form-group mb-2">
+                            <label>默认同步策略:</label>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                                <div class="strategy-option" style="padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer;" onclick="selectStrategy('timestamp_priority')">
+                                    <input type="radio" name="syncStrategy" value="timestamp_priority" checked style="margin-right: 8px;">
+                                    <strong>时间戳优先</strong>
+                                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #666;">自动选择最新的数据（根据updated_at字段）</p>
+                                </div>
+                                <div class="strategy-option" style="padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer;" onclick="selectStrategy('primary_priority')">
+                                    <input type="radio" name="syncStrategy" value="primary_priority" style="margin-right: 8px;">
+                                    <strong>SQLite优先</strong>
+                                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #666;">始终使用SQLite数据库的数据</p>
+                                </div>
+                                <div class="strategy-option" style="padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer;" onclick="selectStrategy('mysql_priority')">
+                                    <input type="radio" name="syncStrategy" value="mysql_priority" style="margin-right: 8px;">
+                                    <strong>MySQL优先</strong>
+                                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #666;">始终使用MySQL数据库的数据</p>
+                                </div>
+                                <div class="strategy-option" style="padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer;" onclick="selectStrategy('sqlserver_priority')">
+                                    <input type="radio" name="syncStrategy" value="sqlserver_priority" style="margin-right: 8px;">
+                                    <strong>SQL Server优先</strong>
+                                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #666;">始终使用SQL Server数据库的数据</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 手动同步 -->
+                        <div style="padding: 15px; background: #fff3cd; border-radius: 8px; border: 1px solid #ffc107;">
+                            <h3 style="margin: 0 0 10px 0;">手动触发同步</h3>
+                            <p style="margin: 0 0 10px 0; color: #856404;">立即执行一次完整的数据库同步，使用上面选择的策略</p>
+                            <button class="btn btn-warning" onclick="manualSync()" style="width: 100%;">
+                                🔄 立即同步所有数据库
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加科室模态框 -->
+    <div id="addDepartmentModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加科室</h3>
+                <span class="close" onclick="closeAddDepartmentModal()">&times;</span>
+            </div>
+            <form id="addDepartmentForm">
+                <div class="form-group">
+                    <label for="deptName">科室名称</label>
+                    <input type="text" id="deptName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="deptLocation">科室位置</label>
+                    <input type="text" id="deptLocation" class="form-control" required>
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddDepartmentModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">添加</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑科室模态框 -->
+    <div id="editDepartmentModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑科室</h3>
+                <span class="close" onclick="closeEditDepartmentModal()">&times;</span>
+            </div>
+            <form id="editDepartmentForm">
+                <div class="form-group">
+                    <label for="editDeptName">科室名称</label>
+                    <input type="text" id="editDeptName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editDeptLocation">科室位置</label>
+                    <input type="text" id="editDeptLocation" class="form-control" required>
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditDepartmentModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 确认删除模态框 -->
+    <div id="confirmDeleteModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>确认删除</h3>
+                <span class="close" onclick="closeConfirmDeleteModal()">&times;</span>
+            </div>
+            <p id="deleteMessage">确定要删除吗？此操作不可恢复。</p>
+            <div style="text-align: right; margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="closeConfirmDeleteModal()">取消</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加管理员模态框 -->
+    <div id="addAdminModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加管理员</h3>
+                <span class="close" onclick="closeAddAdminModal()">&times;</span>
+            </div>
+            <form id="addAdminForm">
+                <div class="form-group">
+                    <label for="adminUsername">用户名 <span style="color: red;">*</span></label>
+                    <input type="text" id="adminUsername" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminPassword">密码 <span style="color: red;">*</span></label>
+                    <input type="password" id="adminPassword" class="form-control" required>
+                    <small style="color: #666;">密码长度至少6位</small>
+                </div>
+                <div class="form-group">
+                    <label for="adminEmail">邮箱地址</label>
+                    <input type="email" id="adminEmail" class="form-control" placeholder="example@qq.com">
+                    <small style="color: #666;">用于接收数据库同步冲突通知邮件</small>
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddAdminModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">添加</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑管理员模态框 -->
+    <div id="editAdminModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑管理员</h3>
+                <span class="close" onclick="closeEditAdminModal()">&times;</span>
+            </div>
+            <form id="editAdminForm">
+                <input type="hidden" id="editAdminId">
+                <div class="form-group">
+                    <label for="editAdminUsername">用户名</label>
+                    <input type="text" id="editAdminUsername" class="form-control" disabled style="background: #f5f5f5;">
+                    <small style="color: #666;">用户名不可修改</small>
+                </div>
+                <div class="form-group">
+                    <label for="editAdminEmail">邮箱地址</label>
+                    <input type="email" id="editAdminEmail" class="form-control" placeholder="example@qq.com">
+                    <small style="color: #666;">用于接收数据库同步冲突通知邮件</small>
+                </div>
+                <div class="form-group">
+                    <label for="editAdminPassword">新密码</label>
+                    <input type="password" id="editAdminPassword" class="form-control" placeholder="留空则不修改密码">
+                    <small style="color: #666;">如需修改密码，请输入新密码（至少6位）</small>
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditAdminModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加职称模态框 -->
+    <div id="addTitleModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加职称</h3>
+                <span class="close" onclick="closeAddTitleModal()">&times;</span>
+            </div>
+            <form id="addTitleForm">
+                <div class="form-group">
+                    <label for="titleName">职称名称：</label>
+                    <input type="text" id="titleName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="registrationFee">挂号费(元)：</label>
+                    <input type="number" id="registrationFee" class="form-control" step="0.01" min="0" required>
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddTitleModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">添加</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑职称模态框 -->
+    <div id="editTitleModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑职称</h3>
+                <span class="close" onclick="closeEditTitleModal()">&times;</span>
+            </div>
+            <form id="editTitleForm">
+                <input type="hidden" id="editTitleId">
+                <div class="form-group">
+                    <label for="editTitleName">职称名称：</label>
+                    <input type="text" id="editTitleName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRegistrationFee">挂号费(元)：</label>
+                    <input type="number" id="editRegistrationFee" class="form-control" step="0.01" min="0" required>
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditTitleModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑患者模态框 -->
+    <div id="editPatientModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑患者信息</h3>
+                <span class="close" onclick="closeEditPatientModal()">&times;</span>
+            </div>
+            <form id="editPatientForm">
+                <input type="hidden" id="editPatientId">
+                <div class="form-group">
+                    <label for="editPatientName">姓名</label>
+                    <input type="text" id="editPatientName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editPatientPhone">电话</label>
+                    <input type="text" id="editPatientPhone" class="form-control" maxlength="11">
+                </div>
+                <div class="form-group">
+                    <label for="editPatientGender">性别</label>
+                    <select id="editPatientGender" class="form-control">
+                        <option value="">未设置</option>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editPatientBirthday">生日</label>
+                    <input type="date" id="editPatientBirthday" class="form-control">
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditPatientModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑医生模态框 -->
+    <div id="editDoctorModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑医生信息</h3>
+                <span class="close" onclick="closeEditDoctorModal()">&times;</span>
+            </div>
+            <form id="editDoctorForm">
+                <input type="hidden" id="editDoctorId">
+                <div class="form-group">
+                    <label for="editDoctorName">姓名</label>
+                    <input type="text" id="editDoctorName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editDoctorTitle">职称</label>
+                    <select id="editDoctorTitle" class="form-control" required>
+                        <option value="">请选择职称</option>
+                        <!-- 职称选项将动态加载 -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editDoctorDept">科室</label>
+                    <select id="editDoctorDept" class="form-control" required>
+                    </select>
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditDoctorModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑挂号记录模态框 -->
+    <div id="editRegistrationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑挂号记录</h3>
+                <span class="close" onclick="closeEditRegistrationModal()">&times;</span>
+            </div>
+            <form id="editRegistrationForm">
+                <input type="hidden" id="editRegId">
+                <div class="form-group">
+                    <label for="editRegPatient">患者</label>
+                    <input type="text" id="editRegPatient" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="editRegDoctor">医生</label>
+                    <input type="text" id="editRegDoctor" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="editRegTime">预约时间</label>
+                    <input type="datetime-local" id="editRegTime" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="editRegStatus">状态</label>
+                    <select id="editRegStatus" class="form-control" required>
+                        <option value="registered">已挂号</option>
+                        <option value="completed">已就诊</option>
+                        <option value="cancelled">已过号</option>
+                    </select>
+                </div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditRegistrationModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 科室挂号记录详情模态框 -->
+    <div id="deptRegistrationsModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 id="deptModalTitle">科室挂号记录</h3>
+                <span class="close" onclick="closeDeptRegistrationsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="loading" id="deptRegLoading">
+                    <div class="spinner"></div>
+                </div>
+                <div id="deptRegContainer" style="display: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>挂号ID</th>
+                                <th>患者</th>
+                                <th>医生</th>
+                                <th>预约时间</th>
+                                <th>状态</th>
+                                <th>创建时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deptRegTable">
+                        </tbody>
+                    </table>
+                    <p id="noDataMessage" style="text-align: center; color: #999; padding: 2rem; display: none;">
+                        该科室暂无挂号记录
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑排班模态框 -->
+    <div id="editScheduleModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3>编辑医生排班</h3>
+                <span class="close" onclick="closeEditScheduleModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <h4 id="scheduleDocName" style="margin-bottom: 1.5rem; color: #333;"></h4>
+                
+                <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                        ✓ 勾选表示该时段可预约 &nbsp;&nbsp; ✗ 不勾选表示该时段不可预约
+                    </p>
+                </div>
+                
+                <table class="table" style="margin-bottom: 0;">
+                    <thead>
+                        <tr>
+                            <th style="width: 120px;">星期</th>
+                            <th style="text-align: center;">上午</th>
+                            <th style="text-align: center;">下午</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scheduleGrid">
+                        <tr>
+                            <td><strong>周一</strong></td>
+                            <td style="text-align: center;"><input type="checkbox" id="monday_am" class="schedule-checkbox"></td>
+                            <td style="text-align: center;"><input type="checkbox" id="monday_pm" class="schedule-checkbox"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>周二</strong></td>
+                            <td style="text-align: center;"><input type="checkbox" id="tuesday_am" class="schedule-checkbox"></td>
+                            <td style="text-align: center;"><input type="checkbox" id="tuesday_pm" class="schedule-checkbox"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>周三</strong></td>
+                            <td style="text-align: center;"><input type="checkbox" id="wednesday_am" class="schedule-checkbox"></td>
+                            <td style="text-align: center;"><input type="checkbox" id="wednesday_pm" class="schedule-checkbox"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>周四</strong></td>
+                            <td style="text-align: center;"><input type="checkbox" id="thursday_am" class="schedule-checkbox"></td>
+                            <td style="text-align: center;"><input type="checkbox" id="thursday_pm" class="schedule-checkbox"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>周五</strong></td>
+                            <td style="text-align: center;"><input type="checkbox" id="friday_am" class="schedule-checkbox"></td>
+                            <td style="text-align: center;"><input type="checkbox" id="friday_pm" class="schedule-checkbox"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>周六</strong></td>
+                            <td style="text-align: center;"><input type="checkbox" id="saturday_am" class="schedule-checkbox"></td>
+                            <td style="text-align: center;"><input type="checkbox" id="saturday_pm" class="schedule-checkbox"></td>
+                        </tr>
+                        <tr>
+                            <td><strong>周日</strong></td>
+                            <td style="text-align: center;"><input type="checkbox" id="sunday_am" class="schedule-checkbox"></td>
+                            <td style="text-align: center;"><input type="checkbox" id="sunday_pm" class="schedule-checkbox"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div style="text-align: right; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditScheduleModal()">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSchedule()">保存排班</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑数据模态框 -->
+    <div id="editDataModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑数据</h3>
+                <span class="close" onclick="closeEditDataModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="editDataForm"></div>
+                <div style="text-align: right; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditDataModal()">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDataChanges()">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 冲突解决模态框 -->
+    <div id="conflictResolveModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>解决数据冲突</h3>
+                <span class="close" onclick="closeConflictResolveModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="conflictDetails"></div>
+                
+                <div class="form-group mt-2">
+                    <label>选择解决策略:</label>
+                    <select id="conflictStrategy" class="form-control">
+                        <option value="timestamp_priority">时间戳优先 - 选择最新修改的数据</option>
+                        <option value="primary_priority">主数据库优先 - 使用SQLite数据</option>
+                        <option value="mysql_priority">MySQL优先 - 使用MySQL数据</option>
+                        <option value="sqlserver_priority">SQL Server优先 - 使用SQL Server数据</option>
+                        <option value="delete_all" style="color: #dc3545;">🗑️ 删除所有记录 - 从所有数据库中删除此记录</option>
+                    </select>
+                </div>
+                
+                <div style="text-align: right; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeConflictResolveModal()">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="executeConflictResolution()">执行解决</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 删除确认模态框 -->
+    <div id="deleteConfirmModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>确认删除</h3>
+                <span class="close" onclick="closeDeleteConfirmModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div style="padding: 20px; text-align: center;">
+                    <div style="font-size: 48px; color: #e74c3c; margin-bottom: 15px;">⚠️</div>
+                    <h4 style="color: #e74c3c; margin-bottom: 10px;">警告：此操作不可恢复！</h4>
+                    <p style="margin-bottom: 15px;">您确定要删除这条记录吗？</p>
+                    <div id="deleteRecordInfo" style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 15px; text-align: left;">
+                    </div>
+                    <p style="color: #666; font-size: 14px;">
+                        <strong>数据库:</strong> <span id="deleteDatabase"></span><br>
+                        <strong>表名:</strong> <span id="deleteTable"></span>
+                    </p>
+                </div>
+                
+                <div style="text-align: right; margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeDeleteConfirmModal()">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDatabaseDelete()">确认删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/config.js?v=2.6"></script>
+    <script>
+        let currentEditDeptId = null;
+        let currentDeleteAction = null;
+        let currentUserType = 'all';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!localStorage.getItem('token') || localStorage.getItem('role') !== 'admin') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Set username
+            const usernameElements = document.querySelectorAll('#username');
+            usernameElements.forEach(el => {
+                el.textContent = localStorage.getItem('username');
+            });
+
+            // Load initial data for dashboard only
+            loadStats();
+
+            // Set up form event listeners
+            document.getElementById('addDepartmentForm').addEventListener('submit', handleAddDepartment);
+            document.getElementById('editDepartmentForm').addEventListener('submit', handleEditDepartment);
+            document.getElementById('addAdminForm').addEventListener('submit', handleAddAdmin);
+            document.getElementById('editAdminForm').addEventListener('submit', handleEditAdmin);
+            document.getElementById('editPatientForm').addEventListener('submit', handleEditPatient);
+            document.getElementById('editDoctorForm').addEventListener('submit', handleEditDoctor);
+            document.getElementById('editRegistrationForm').addEventListener('submit', handleEditRegistration);
+        });
+
+        // 图表实例
+        let departmentChart = null;
+        let timeChart = null;
+
+        async function loadStats() {
+            try {
+                const stats = await apiRequest('/admin/stats');
+                
+                document.getElementById('totalPatients').textContent = stats.total_patients;
+                document.getElementById('totalDoctors').textContent = stats.total_doctors;
+                document.getElementById('totalDepartments').textContent = stats.total_departments;
+                document.getElementById('totalRegistrations').textContent = stats.total_registrations;
+                document.getElementById('activeRegistrations').textContent = stats.active_registrations;
+                document.getElementById('completedRegistrations').textContent = stats.completed_registrations;
+                
+                // 显示挂号费用统计
+                const totalFee = stats.total_fee || 0;
+                const monthlyFee = stats.monthly_fee || 0;
+                document.getElementById('totalFee').textContent = `¥${totalFee.toFixed(2)}`;
+                document.getElementById('monthlyFee').textContent = `¥${monthlyFee.toFixed(2)}`;
+                
+                // 加载图表数据
+                loadCharts();
+            } catch (error) {
+                showMessage('加载统计数据失败: ' + error.message, 'danger');
+            }
+        }
+
+        async function loadCharts() {
+            try {
+                const chartData = await apiRequest('/admin/chart-data');
+                console.log('Chart data received:', chartData);
+                
+                // 检查数据是否有效
+                if (!chartData || !chartData.department || !chartData.time) {
+                    console.error('Invalid chart data:', chartData);
+                    showMessage('图表数据格式错误', 'danger');
+                    return;
+                }
+                
+                // 销毁旧图表
+                if (departmentChart) departmentChart.destroy();
+                if (timeChart) timeChart.destroy();
+                
+                // 创建科室分布饼图
+                const deptCtx = document.getElementById('departmentChart').getContext('2d');
+                departmentChart = new Chart(deptCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: chartData.department.labels,
+                        datasets: [{
+                            label: '挂号数量',
+                            data: chartData.department.data,
+                            backgroundColor: [
+                                '#FF6384',
+                                '#36A2EB',
+                                '#FFCE56',
+                                '#4BC0C0',
+                                '#9966FF',
+                                '#FF9F40',
+                                '#FF6384',
+                                '#C9CBCF'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${label}: ${value}人 (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        },
+                        onClick: (event, elements) => {
+                            if (elements.length > 0) {
+                                const index = elements[0].index;
+                                const deptName = chartData.department.labels[index];
+                                showDeptRegistrations(deptName);
+                            }
+                        },
+                        onHover: (event, elements) => {
+                            event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+                        }
+                    }
+                });
+                
+                // 创建时间趋势折线图
+                const timeCtx = document.getElementById('timeChart').getContext('2d');
+                timeChart = new Chart(timeCtx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.time.labels,
+                        datasets: [{
+                            label: '挂号数量',
+                            data: chartData.time.data,
+                            borderColor: '#36A2EB',
+                            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 5,
+                            pointBackgroundColor: '#36A2EB',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 7
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `挂号数量: ${context.parsed.y}人`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1,
+                                    font: {
+                                        size: 12
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+                
+            } catch (error) {
+                console.error('加载图表数据失败:', error);
+            }
+        }
+
+        async function loadDepartments() {
+            const loading = document.getElementById('departmentsLoading');
+            const container = document.getElementById('departmentsContainer');
+            
+            loading.style.display = 'flex';
+            container.style.display = 'none';
+
+            try {
+                const [departments, doctors] = await Promise.all([
+                    apiRequest('/departments'),
+                    apiRequest('/admin/doctors')
+                ]);
+
+                const tbody = document.getElementById('departmentsTable');
+                tbody.innerHTML = '';
+
+                departments.forEach(dept => {
+                    const doctorCount = doctors.filter(doc => doc.dept_id === dept.dept_id).length;
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${dept.dept_id}</td>
+                        <td>${dept.dept_name}</td>
+                        <td>${dept.location}</td>
+                        <td>${doctorCount}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick="showEditDepartmentModal(${dept.dept_id}, '${dept.dept_name}', '${dept.location}')">编辑</button>
+                            <button class="btn btn-danger btn-sm" onclick="showDeleteDepartmentModal(${dept.dept_id}, '${dept.dept_name}', ${doctorCount})">删除</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                container.style.display = 'block';
+            } catch (error) {
+                showMessage('加载科室数据失败: ' + error.message, 'danger');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        async function loadUsers(type) {
+            currentUserType = type;
+            const loading = document.getElementById('usersLoading');
+            const container = document.getElementById('usersContainer');
+            
+            // Update button styles
+            document.getElementById('showAll').classList.remove('btn-primary');
+            document.getElementById('showAll').classList.add('btn-secondary');
+            document.getElementById('showPatients').classList.remove('btn-primary');
+            document.getElementById('showPatients').classList.add('btn-secondary');
+            document.getElementById('showDoctors').classList.remove('btn-primary');
+            document.getElementById('showDoctors').classList.add('btn-secondary');
+            document.getElementById('showAdmins').classList.remove('btn-primary');
+            document.getElementById('showAdmins').classList.add('btn-secondary');
+            
+            // Show/hide add admin button
+            const addAdminBtn = document.getElementById('addAdminBtn');
+            if (type === 'admins') {
+                addAdminBtn.style.display = 'inline-block';
+                document.getElementById('showAdmins').classList.remove('btn-secondary');
+                document.getElementById('showAdmins').classList.add('btn-primary');
+            } else {
+                addAdminBtn.style.display = 'none';
+                if (type === 'all') {
+                    document.getElementById('showAll').classList.remove('btn-secondary');
+                    document.getElementById('showAll').classList.add('btn-primary');
+                } else if (type === 'patients') {
+                    document.getElementById('showPatients').classList.remove('btn-secondary');
+                    document.getElementById('showPatients').classList.add('btn-primary');
+                } else if (type === 'doctors') {
+                    document.getElementById('showDoctors').classList.remove('btn-secondary');
+                    document.getElementById('showDoctors').classList.add('btn-primary');
+                }
+            }
+            
+            loading.style.display = 'flex';
+            container.style.display = 'none';
+
+            try {
+                let users = [];
+                
+                // Load all users if type is 'all'
+                if (type === 'all') {
+                    const [patients, doctors, admins] = await Promise.all([
+                        apiRequest('/admin/patients'),
+                        apiRequest('/admin/doctors'),
+                        apiRequest('/admin/admins')
+                    ]);
+                    
+                    // Add type field to each user
+                    patients.forEach(u => u.userType = 'patient');
+                    doctors.forEach(u => u.userType = 'doctor');
+                    admins.forEach(u => u.userType = 'admin');
+                    
+                    users = [...patients, ...doctors, ...admins];
+                } else {
+                    users = await apiRequest(`/admin/${type}`);
+                }
+                const thead = document.getElementById('usersTableHead');
+                const tbody = document.getElementById('usersTable');
+                
+                tbody.innerHTML = '';
+
+                if (type === 'patients') {
+                    thead.innerHTML = `
+                        <tr>
+                            <th>患者ID</th>
+                            <th>用户名</th>
+                            <th>姓名</th>
+                            <th>电话</th>
+                            <th>性别</th>
+                            <th>操作</th>
+                        </tr>
+                    `;
+                    
+                    users.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${user.patient_id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.name}</td>
+                            <td>${user.phone || '未提供'}</td>
+                            <td>${user.gender || '未设置'}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick='showEditPatientModal(${JSON.stringify(user)})'>编辑</button>
+                                <button class="btn btn-danger btn-sm" onclick="showDeleteUserModal('patient', ${user.patient_id}, '${user.name}')">删除</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else if (type === 'doctors') {
+                    thead.innerHTML = `
+                        <tr>
+                            <th>医生ID</th>
+                            <th>用户名</th>
+                            <th>姓名</th>
+                            <th>职称</th>
+                            <th>科室</th>
+                            <th>操作</th>
+                        </tr>
+                    `;
+                    
+                    users.forEach(user => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${user.doctor_id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.name}</td>
+                            <td>${user.title || '未设置'}</td>
+                            <td>${user.dept_name || '未知科室'}</td>
+                            <td>
+                                <button class="btn btn-warning btn-sm" onclick='showEditDoctorModal(${JSON.stringify(user)})'>编辑</button>
+                                <button class="btn btn-danger btn-sm" onclick="showDeleteUserModal('doctor', ${user.doctor_id}, '${user.name}')">删除</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else if (type === 'admins') {
+                    thead.innerHTML = `
+                        <tr>
+                            <th>管理员ID</th>
+                            <th>用户名</th>
+                            <th>邮箱</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    `;
+                    
+                    users.forEach(user => {
+                        const currentUserId = parseInt(localStorage.getItem('user_id'));
+                        const canEdit = user.admin_id <= currentUserId;
+                        const canDelete = user.admin_id > currentUserId;
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${user.admin_id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email || '<span style="color: #999;">未设置</span>'}</td>
+                            <td>${user.created_at ? new Date(user.created_at).toLocaleString('zh-CN') : '-'}</td>
+                            <td>
+                                ${canEdit ? 
+                                    `<button class="btn btn-primary btn-sm" onclick="editAdmin(${user.admin_id})">编辑</button>` : 
+                                    '<span style="color: #999;">无权限</span>'
+                                }
+                                ${canDelete ? 
+                                    `<button class="btn btn-danger btn-sm" onclick="showDeleteUserModal('admin', ${user.admin_id}, '${user.username}')">删除</button>` : 
+                                    ''
+                                }
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else if (type === 'all') {
+                    thead.innerHTML = `
+                        <tr>
+                            <th>用户ID</th>
+                            <th>用户类型</th>
+                            <th>用户名</th>
+                            <th>姓名</th>
+                            <th>其他信息</th>
+                            <th>操作</th>
+                        </tr>
+                    `;
+                    
+                    users.forEach(user => {
+                        const row = document.createElement('tr');
+                        let userId, userTypeText, name, otherInfo, actionBtns;
+                        
+                        if (user.userType === 'patient') {
+                            userId = user.patient_id;
+                            userTypeText = '<span class="status-badge" style="background-color: #e3f2fd; color: #1976d2;">患者</span>';
+                            name = user.name;
+                            otherInfo = `${user.phone || '未提供'} / ${user.gender || '未设置'}`;
+                            actionBtns = `
+                                <button class="btn btn-warning btn-sm" onclick='showEditPatientModal(${JSON.stringify(user)})'>编辑</button>
+                                <button class="btn btn-danger btn-sm" onclick="showDeleteUserModal('patient', ${user.patient_id}, '${user.name}')">删除</button>
+                            `;
+                        } else if (user.userType === 'doctor') {
+                            userId = user.doctor_id;
+                            userTypeText = '<span class="status-badge" style="background-color: #e8f5e8; color: #2e7d32;">医生</span>';
+                            name = user.name;
+                            otherInfo = `${user.title || '未设置'} / ${user.dept_name || '未知科室'}`;
+                            actionBtns = `
+                                <button class="btn btn-warning btn-sm" onclick='showEditDoctorModal(${JSON.stringify(user)})'>编辑</button>
+                                <button class="btn btn-danger btn-sm" onclick="showDeleteUserModal('doctor', ${user.doctor_id}, '${user.name}')">删除</button>
+                            `;
+                        } else if (user.userType === 'admin') {
+                            userId = user.admin_id;
+                            userTypeText = '<span class="status-badge" style="background-color: #fff3cd; color: #856404;">管理员</span>';
+                            name = '-';
+                            otherInfo = '-';
+                            const currentUserId = parseInt(localStorage.getItem('user_id'));
+                            const canDelete = user.admin_id > currentUserId;
+                            actionBtns = canDelete ? 
+                                `<button class="btn btn-danger btn-sm" onclick="showDeleteUserModal('admin', ${user.admin_id}, '${user.username}')">删除</button>` : 
+                                '<span style="color: #999;">不可删除</span>';
+                        }
+                        
+                        row.innerHTML = `
+                            <td>${userId}</td>
+                            <td>${userTypeText}</td>
+                            <td>${user.username}</td>
+                            <td>${name}</td>
+                            <td>${otherInfo}</td>
+                            <td>${actionBtns}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }
+
+                container.style.display = 'block';
+            } catch (error) {
+                showMessage('加载用户数据失败: ' + error.message, 'danger');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        async function loadRegistrations() {
+            const loading = document.getElementById('registrationsLoading');
+            const container = document.getElementById('registrationsContainer');
+            
+            loading.style.display = 'flex';
+            container.style.display = 'none';
+
+            try {
+                const registrations = await apiRequest('/admin/registrations');
+                const tbody = document.getElementById('registrationsTable');
+                
+                tbody.innerHTML = '';
+
+                // Sort by creation time (newest first)
+                registrations.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+                registrations.forEach(reg => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${reg.reg_id}</td>
+                        <td>${reg.patient_name}</td>
+                        <td>${reg.doctor_name}</td>
+                        <td>${reg.dept_name}</td>
+                        <td>${formatDateTime(reg.reg_time)}</td>
+                        <td><span class="status-badge status-${reg.status}">${getStatusText(reg.status)}</span></td>
+                        <td>${formatDateTime(reg.created_at)}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm" onclick='showEditRegistrationModal(${JSON.stringify(reg)})'>编辑</button>
+                            <button class="btn btn-danger btn-sm" onclick="showDeleteRegistrationModal(${reg.reg_id})">删除</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                container.style.display = 'block';
+            } catch (error) {
+                showMessage('加载挂号记录失败: ' + error.message, 'danger');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function showUserType(type) {
+            loadUsers(type);
+        }
+
+        // Department management functions
+        function showAddDepartmentModal() {
+            document.getElementById('addDepartmentModal').style.display = 'block';
+        }
+
+        function closeAddDepartmentModal() {
+            document.getElementById('addDepartmentModal').style.display = 'none';
+            document.getElementById('addDepartmentForm').reset();
+        }
+
+        async function handleAddDepartment(e) {
+            e.preventDefault();
+            
+            const deptName = document.getElementById('deptName').value;
+            const deptLocation = document.getElementById('deptLocation').value;
+
+            try {
+                await apiRequest('/admin/department', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        dept_name: deptName,
+                        location: deptLocation
+                    })
+                });
+
+                showMessage('科室添加成功', 'success');
+                closeAddDepartmentModal();
+                loadDepartments();
+                loadStats();
+            } catch (error) {
+                showMessage('添加科室失败: ' + error.message, 'danger');
+            }
+        }
+
+        function showEditDepartmentModal(deptId, deptName, location) {
+            currentEditDeptId = deptId;
+            document.getElementById('editDeptName').value = deptName;
+            document.getElementById('editDeptLocation').value = location;
+            document.getElementById('editDepartmentModal').style.display = 'block';
+        }
+
+        function closeEditDepartmentModal() {
+            document.getElementById('editDepartmentModal').style.display = 'none';
+            document.getElementById('editDepartmentForm').reset();
+            currentEditDeptId = null;
+        }
+
+        async function handleEditDepartment(e) {
+            e.preventDefault();
+            
+            if (!currentEditDeptId) return;
+
+            const deptName = document.getElementById('editDeptName').value;
+            const deptLocation = document.getElementById('editDeptLocation').value;
+
+            try {
+                await apiRequest(`/admin/department/${currentEditDeptId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        dept_name: deptName,
+                        location: deptLocation
+                    })
+                });
+
+                showMessage('科室更新成功', 'success');
+                closeEditDepartmentModal();
+                loadDepartments();
+            } catch (error) {
+                showMessage('更新科室失败: ' + error.message, 'danger');
+            }
+        }
+
+        function showDeleteDepartmentModal(deptId, deptName, doctorCount) {
+            if (doctorCount > 0) {
+                showMessage(`无法删除科室"${deptName}"，该科室还有${doctorCount}名医生`, 'warning');
+                return;
+            }
+
+            currentDeleteAction = {
+                type: 'department',
+                id: deptId,
+                name: deptName
+            };
+
+            document.getElementById('deleteMessage').textContent = `确定要删除科室"${deptName}"吗？此操作不可恢复。`;
+            document.getElementById('confirmDeleteModal').style.display = 'block';
+        }
+
+        function showDeleteUserModal(role, userId, userName) {
+            currentDeleteAction = {
+                type: 'user',
+                role: role,
+                id: userId,
+                name: userName
+            };
+
+            const roleText = role === 'patient' ? '患者' : '医生';
+            document.getElementById('deleteMessage').textContent = `确定要删除${roleText}"${userName}"吗？此操作不可恢复。`;
+            document.getElementById('confirmDeleteModal').style.display = 'block';
+        }
+
+        function closeConfirmDeleteModal() {
+            document.getElementById('confirmDeleteModal').style.display = 'none';
+            currentDeleteAction = null;
+        }
+
+        async function confirmDelete() {
+            if (!currentDeleteAction) return;
+
+            try {
+                if (currentDeleteAction.type === 'department') {
+                    await apiRequest(`/admin/department/${currentDeleteAction.id}`, {
+                        method: 'DELETE'
+                    });
+                    showMessage('科室删除成功', 'success');
+                    loadDepartments();
+                } else if (currentDeleteAction.type === 'user') {
+                    await apiRequest(`/admin/users/${currentDeleteAction.role}/${currentDeleteAction.id}`, {
+                        method: 'DELETE'
+                    });
+                    showMessage('用户删除成功', 'success');
+                    loadUsers(currentUserType);
+                } else if (currentDeleteAction.type === 'registration') {
+                    await apiRequest(`/admin/registrations/${currentDeleteAction.id}`, {
+                        method: 'DELETE'
+                    });
+                    showMessage('挂号记录删除成功', 'success');
+                    loadRegistrations();
+                }
+                
+                loadStats();
+                closeConfirmDeleteModal();
+            } catch (error) {
+                showMessage('删除失败: ' + error.message, 'danger');
+            }
+        }
+
+        // Edit Patient Modal
+        function showEditPatientModal(patient) {
+            document.getElementById('editPatientId').value = patient.patient_id;
+            document.getElementById('editPatientName').value = patient.name;
+            document.getElementById('editPatientPhone').value = patient.phone || '';
+            document.getElementById('editPatientGender').value = patient.gender || '';
+            document.getElementById('editPatientBirthday').value = patient.birthday || '';
+            document.getElementById('editPatientModal').style.display = 'block';
+        }
+
+        function closeEditPatientModal() {
+            document.getElementById('editPatientModal').style.display = 'none';
+            document.getElementById('editPatientForm').reset();
+        }
+
+        async function handleEditPatient(e) {
+            e.preventDefault();
+            
+            const patientId = document.getElementById('editPatientId').value;
+            const data = {
+                name: document.getElementById('editPatientName').value,
+                phone: document.getElementById('editPatientPhone').value,
+                gender: document.getElementById('editPatientGender').value,
+                birthday: document.getElementById('editPatientBirthday').value
+            };
+
+            try {
+                await apiRequest(`/admin/patients/${patientId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+
+                showMessage('患者信息更新成功', 'success');
+                closeEditPatientModal();
+                loadUsers(currentUserType);
+            } catch (error) {
+                showMessage('更新失败: ' + error.message, 'danger');
+            }
+        }
+
+        // Edit Doctor Modal
+        async function showEditDoctorModal(doctor) {
+            document.getElementById('editDoctorId').value = doctor.doctor_id;
+            document.getElementById('editDoctorName').value = doctor.name;
+            
+            // Load titles for dropdown
+            try {
+                const titlesData = await apiRequest('/titles');
+                const titleSelect = document.getElementById('editDoctorTitle');
+                titleSelect.innerHTML = '<option value="">请选择职称</option>';
+                
+                if (titlesData.success && titlesData.titles) {
+                    titlesData.titles.forEach(title => {
+                        const option = document.createElement('option');
+                        option.value = title.title_id;
+                        option.textContent = title.title_name;
+                        if (title.title_id === doctor.title_id) {
+                            option.selected = true;
+                        }
+                        titleSelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('加载职称失败:', error);
+            }
+            
+            // Load departments for dropdown
+            try {
+                const departments = await apiRequest('/departments');
+                const select = document.getElementById('editDoctorDept');
+                select.innerHTML = '';
+                departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept.dept_id;
+                    option.textContent = dept.dept_name;
+                    if (dept.dept_id === doctor.dept_id) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                showMessage('加载科室列表失败', 'danger');
+            }
+            
+            document.getElementById('editDoctorModal').style.display = 'block';
+        }
+
+        function closeEditDoctorModal() {
+            document.getElementById('editDoctorModal').style.display = 'none';
+            document.getElementById('editDoctorForm').reset();
+        }
+
+        async function handleEditDoctor(e) {
+            e.preventDefault();
+            
+            const doctorId = document.getElementById('editDoctorId').value;
+            const data = {
+                name: document.getElementById('editDoctorName').value,
+                title_id: parseInt(document.getElementById('editDoctorTitle').value) || null,
+                dept_id: parseInt(document.getElementById('editDoctorDept').value)
+            };
+
+            try {
+                await apiRequest(`/admin/doctors/${doctorId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+
+                showMessage('医生信息更新成功', 'success');
+                closeEditDoctorModal();
+                loadUsers(currentUserType);
+            } catch (error) {
+                showMessage('更新失败: ' + error.message, 'danger');
+            }
+        }
+
+        // Edit Registration Modal
+        function showEditRegistrationModal(registration) {
+            document.getElementById('editRegId').value = registration.reg_id;
+            document.getElementById('editRegPatient').value = registration.patient_name;
+            document.getElementById('editRegDoctor').value = registration.doctor_name;
+            
+            // Convert datetime to local format
+            const regTime = new Date(registration.reg_time);
+            const localDateTime = new Date(regTime.getTime() - regTime.getTimezoneOffset() * 60000)
+                .toISOString().slice(0, 16);
+            document.getElementById('editRegTime').value = localDateTime;
+            document.getElementById('editRegStatus').value = registration.status;
+            
+            document.getElementById('editRegistrationModal').style.display = 'block';
+        }
+
+        function closeEditRegistrationModal() {
+            document.getElementById('editRegistrationModal').style.display = 'none';
+            document.getElementById('editRegistrationForm').reset();
+        }
+
+        async function handleEditRegistration(e) {
+            e.preventDefault();
+            
+            const regId = document.getElementById('editRegId').value;
+            const regTime = document.getElementById('editRegTime').value;
+            const status = document.getElementById('editRegStatus').value;
+
+            try {
+                await apiRequest(`/admin/registrations/${regId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        reg_time: regTime,
+                        status: status
+                    })
+                });
+
+                showMessage('挂号记录更新成功', 'success');
+                closeEditRegistrationModal();
+                loadRegistrations();
+                loadStats();
+            } catch (error) {
+                showMessage('更新失败: ' + error.message, 'danger');
+            }
+        }
+
+        // Delete Registration
+        function showDeleteRegistrationModal(regId) {
+            currentDeleteAction = {
+                type: 'registration',
+                id: regId
+            };
+            document.getElementById('deleteMessage').textContent = '确定要删除这条挂号记录吗？此操作不可恢复。';
+            document.getElementById('confirmDeleteModal').style.display = 'block';
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'registered': '已挂号',
+                'completed': '已就诊',
+                'cancelled': '已过号'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatDateTime(dateTimeStr) {
+            const date = new Date(dateTimeStr);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // 显示科室挂号趋势
+        async function showDeptRegistrations(deptName) {
+            try {
+                // 获取该科室一个月的挂号趋势数据
+                const trendData = await apiRequest(`/admin/department-trend?dept_name=${encodeURIComponent(deptName)}`);
+                
+                // 更新折线图
+                if (timeChart) {
+                    timeChart.data.labels = trendData.labels;
+                    timeChart.data.datasets[0].data = trendData.data;
+                    timeChart.data.datasets[0].label = `${deptName} - 挂号数量`;
+                    timeChart.options.plugins.title = {
+                        display: true,
+                        text: `${deptName} - 近30天挂号趋势`,
+                        font: { size: 14, weight: 'bold' },
+                        padding: { bottom: 10 }
+                    };
+                    timeChart.update();
+                }
+                
+                showMessage(`已切换到 ${deptName} 的挂号趋势`, 'info');
+            } catch (error) {
+                showMessage('加载科室趋势失败: ' + error.message, 'danger');
+            }
+        }
+
+        // 重置为全部科室趋势
+        async function resetTimeChart() {
+            try {
+                const chartData = await apiRequest('/admin/chart-data');
+                
+                if (timeChart) {
+                    timeChart.data.labels = chartData.time.labels;
+                    timeChart.data.datasets[0].data = chartData.time.data;
+                    timeChart.data.datasets[0].label = '挂号数量';
+                    timeChart.options.plugins.title = {
+                        display: false
+                    };
+                    timeChart.update();
+                }
+            } catch (error) {
+                console.error('重置图表失败:', error);
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = `alert alert-${type} message`;
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // 移动端菜单控制
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // 点击导航项后自动关闭移动端菜单
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        // Admin management functions
+        function showAddAdminModal() {
+            document.getElementById('addAdminModal').style.display = 'block';
+        }
+
+        function closeAddAdminModal() {
+            document.getElementById('addAdminModal').style.display = 'none';
+            document.getElementById('addAdminForm').reset();
+        }
+
+        async function handleAddAdmin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            const email = document.getElementById('adminEmail').value;
+
+            try {
+                await apiRequest('/admin/create_admin', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        email: email || null
+                    })
+                });
+
+                showMessage('管理员添加成功', 'success');
+                closeAddAdminModal();
+                loadUsers('admins');
+            } catch (error) {
+                showMessage('添加管理员失败: ' + error.message, 'danger');
+            }
+        }
+
+        // 编辑管理员相关函数
+        async function editAdmin(adminId) {
+            try {
+                const response = await apiRequest('/admin/admins');
+                const admins = response;
+                const admin = admins.find(a => a.admin_id === adminId);
+                
+                if (!admin) {
+                    showMessage('管理员不存在', 'danger');
+                    return;
+                }
+                
+                document.getElementById('editAdminId').value = admin.admin_id;
+                document.getElementById('editAdminUsername').value = admin.username;
+                document.getElementById('editAdminEmail').value = admin.email || '';
+                document.getElementById('editAdminPassword').value = '';
+                
+                document.getElementById('editAdminModal').style.display = 'block';
+            } catch (error) {
+                showMessage('加载管理员信息失败: ' + error.message, 'danger');
+            }
+        }
+
+        function closeEditAdminModal() {
+            document.getElementById('editAdminModal').style.display = 'none';
+            document.getElementById('editAdminForm').reset();
+        }
+
+        async function handleEditAdmin(e) {
+            e.preventDefault();
+            
+            const adminId = document.getElementById('editAdminId').value;
+            const email = document.getElementById('editAdminEmail').value;
+            const password = document.getElementById('editAdminPassword').value;
+            
+            const data = { email: email || null };
+            if (password) {
+                data.password = password;
+            }
+            
+            try {
+                await apiRequest(`/admin/admins/${adminId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+                
+                showMessage('管理员信息更新成功', 'success');
+                closeEditAdminModal();
+                loadUsers('admins');
+            } catch (error) {
+                showMessage('更新失败: ' + error.message, 'danger');
+            }
+        }
+
+        // Sidebar navigation function
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show selected section
+            const selectedSection = document.getElementById(`section-${sectionName}`);
+            if (selectedSection) {
+                selectedSection.classList.add('active');
+            }
+
+            // Update navigation active state
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+
+            // Update page title
+            const titles = {
+                'dashboard': '系统概览',
+                'departments': '科室管理',
+                'titles': '职称管理',
+                'users': '用户管理',
+                'registrations': '挂号记录',
+                'schedule': '排班管理',
+                'database': '数据库管理'
+            };
+            document.getElementById('pageTitle').textContent = titles[sectionName] || '管理员控制台';
+
+            // Load data for the section if needed
+            if (sectionName === 'dashboard') {
+                loadStats();
+            } else if (sectionName === 'departments') {
+                loadDepartments();
+            } else if (sectionName === 'titles') {
+                loadTitles();
+            } else if (sectionName === 'users') {
+                // Load all users by default
+                showUserType('all');
+            } else if (sectionName === 'registrations') {
+                loadRegistrations();
+            } else if (sectionName === 'schedule') {
+                loadScheduleList();
+            } else if (sectionName === 'database') {
+                initDatabaseManagement();
+            }
+        }
+
+        // Search functions
+        function searchDepartments() {
+            const searchInput = document.getElementById('deptSearchInput').value.toLowerCase();
+            const table = document.getElementById('departmentsTable');
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                if (cells.length > 0) {
+                    const deptName = cells[1].textContent.toLowerCase();
+                    const location = cells[2].textContent.toLowerCase();
+                    
+                    if (deptName.includes(searchInput) || location.includes(searchInput)) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+        
+        function searchUsers() {
+            const searchInput = document.getElementById('userSearchInput').value.toLowerCase();
+            const table = document.getElementById('usersTable');
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                if (cells.length > 0) {
+                    let shouldShow = false;
+                    
+                    // Search in username and name columns
+                    for (let j = 0; j < cells.length - 1; j++) { // Exclude last column (actions)
+                        const cellText = cells[j].textContent.toLowerCase();
+                        if (cellText.includes(searchInput)) {
+                            shouldShow = true;
+                            break;
+                        }
+                    }
+                    
+                    rows[i].style.display = shouldShow ? '' : 'none';
+                }
+            }
+        }
+        
+        function searchRegistrations() {
+            const patientSearch = document.getElementById('regPatientSearch').value.toLowerCase();
+            const doctorSearch = document.getElementById('regDoctorSearch').value.toLowerCase();
+            const statusFilter = document.getElementById('regStatusFilter').value;
+            
+            const table = document.getElementById('registrationsTable');
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                if (cells.length > 0) {
+                    const patientName = cells[1].textContent.toLowerCase();
+                    const doctorName = cells[2].textContent.toLowerCase();
+                    const status = cells[5].textContent;
+                    
+                    let matchPatient = patientSearch === '' || patientName.includes(patientSearch);
+                    let matchDoctor = doctorSearch === '' || doctorName.includes(doctorSearch);
+                    let matchStatus = statusFilter === '' || status.includes(getStatusText(statusFilter));
+                    
+                    if (matchPatient && matchDoctor && matchStatus) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            localStorage.removeItem('username');
+            localStorage.removeItem('user_id');
+            window.location.href = 'login.html';
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = [
+                'addDepartmentModal', 
+                'editDepartmentModal', 
+                'confirmDeleteModal', 
+                'addAdminModal',
+                'editPatientModal',
+                'editDoctorModal',
+                'editRegistrationModal',
+                'deptRegistrationsModal'
+            ];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Schedule Management Functions
+        let currentScheduleDoctorId = null;
+        let allDoctorsForSchedule = [];
+
+        async function loadScheduleList() {
+            const loading = document.getElementById('scheduleLoading');
+            const container = document.getElementById('scheduleContainer');
+            
+            loading.style.display = 'flex';
+            container.style.display = 'none';
+
+            try {
+                const doctors = await apiRequest('/admin/doctors');
+                allDoctorsForSchedule = doctors;
+                
+                // 填充科室下拉框
+                const deptSelect = document.getElementById('scheduleSearchDept');
+                const departments = [...new Set(doctors.map(d => d.dept_name))].filter(Boolean);
+                deptSelect.innerHTML = '<option value="">全部科室</option>';
+                departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept;
+                    option.textContent = dept;
+                    deptSelect.appendChild(option);
+                });
+                
+                // 显示所有医生
+                displayScheduleList(doctors);
+                container.style.display = 'block';
+            } catch (error) {
+                showMessage('加载排班列表失败: ' + error.message, 'danger');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayScheduleList(doctors) {
+            const tbody = document.getElementById('scheduleTable');
+            tbody.innerHTML = '';
+
+            doctors.forEach(doctor => {
+                const row = document.createElement('tr');
+                const hasSchedule = doctor.schedule ? '已设置' : '未设置';
+                const scheduleClass = doctor.schedule ? 'status-completed' : 'status-cancelled';
+                
+                row.innerHTML = `
+                    <td>${doctor.name}</td>
+                    <td>${doctor.title || '-'}</td>
+                    <td>${doctor.dept_name}</td>
+                    <td><span class="status-badge ${scheduleClass}">${hasSchedule}</span></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" onclick="editSchedule(${doctor.doctor_id}, '${doctor.name}')">
+                            ${doctor.schedule ? '编辑排班' : '设置排班'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function searchSchedule() {
+            const nameSearch = document.getElementById('scheduleSearchName').value.toLowerCase();
+            const deptFilter = document.getElementById('scheduleSearchDept').value;
+            const statusFilter = document.getElementById('scheduleSearchStatus').value;
+            
+            const filtered = allDoctorsForSchedule.filter(doctor => {
+                const nameMatch = !nameSearch || doctor.name.toLowerCase().includes(nameSearch);
+                const deptMatch = !deptFilter || doctor.dept_name === deptFilter;
+                const statusMatch = !statusFilter || 
+                    (statusFilter === 'set' && doctor.schedule) ||
+                    (statusFilter === 'unset' && !doctor.schedule);
+                
+                return nameMatch && deptMatch && statusMatch;
+            });
+            
+            displayScheduleList(filtered);
+        }
+
+        async function editSchedule(doctorId, doctorName) {
+            currentScheduleDoctorId = doctorId;
+            document.getElementById('scheduleDocName').textContent = `医生：${doctorName}`;
+
+            try {
+                const data = await apiRequest(`/admin/doctors/${doctorId}/schedule`);
+                const schedule = data.schedule || {};
+
+                // 重置所有复选框
+                document.querySelectorAll('.schedule-checkbox').forEach(cb => {
+                    cb.checked = false;
+                });
+
+                // 设置已有的排班
+                Object.keys(schedule).forEach(key => {
+                    const checkbox = document.getElementById(key);
+                    if (checkbox) {
+                        checkbox.checked = schedule[key];
+                    }
+                });
+
+                document.getElementById('editScheduleModal').style.display = 'block';
+            } catch (error) {
+                showMessage('加载排班信息失败: ' + error.message, 'danger');
+            }
+        }
+
+        async function saveSchedule() {
+            const schedule = {};
+            document.querySelectorAll('.schedule-checkbox').forEach(cb => {
+                schedule[cb.id] = cb.checked;
+            });
+
+            try {
+                await apiRequest(`/admin/doctors/${currentScheduleDoctorId}/schedule`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ schedule })
+                });
+
+                showMessage('排班保存成功', 'success');
+                closeEditScheduleModal();
+                loadScheduleList();
+            } catch (error) {
+                showMessage('保存排班失败: ' + error.message, 'danger');
+            }
+        }
+
+        function closeEditScheduleModal() {
+            document.getElementById('editScheduleModal').style.display = 'none';
+            currentScheduleDoctorId = null;
+        }
+
+        // ==================== 职称管理功能 ====================
+        
+        // 加载职称列表
+        async function loadTitles() {
+            document.getElementById('titlesLoading').style.display = 'block';
+            document.getElementById('titlesContainer').style.display = 'none';
+            
+            try {
+                const data = await apiRequest('/titles');
+                
+                if (data.success) {
+                    displayTitles(data.titles);
+                } else {
+                    showMessage('获取职称列表失败: ' + data.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('网络错误: ' + error.message, 'danger');
+            } finally {
+                document.getElementById('titlesLoading').style.display = 'none';
+                document.getElementById('titlesContainer').style.display = 'block';
+            }
+        }
+
+        // 显示职称列表
+        function displayTitles(titles) {
+            const tbody = document.getElementById('titlesTable');
+            tbody.innerHTML = '';
+            
+            titles.forEach(title => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${title.title_id}</td>
+                    <td>${title.title_name}</td>
+                    <td>¥${title.registration_fee}</td>
+                    <td>${title.doctor_count}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="editTitle(${title.title_id}, '${title.title_name}', ${title.registration_fee})">编辑</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteTitle(${title.title_id}, '${title.title_name}', ${title.doctor_count})" 
+                                ${title.doctor_count > 0 ? 'disabled title="还有医生使用该职称"' : ''}>删除</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 搜索职称
+        function searchTitles() {
+            const searchTerm = document.getElementById('titleSearchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#titlesTable tr');
+            
+            rows.forEach(row => {
+                const titleName = row.cells[1].textContent.toLowerCase();
+                if (titleName.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // 显示添加职称模态框
+        function showAddTitleModal() {
+            document.getElementById('addTitleModal').style.display = 'block';
+            document.getElementById('titleName').value = '';
+            document.getElementById('registrationFee').value = '';
+        }
+
+        // 关闭添加职称模态框
+        function closeAddTitleModal() {
+            document.getElementById('addTitleModal').style.display = 'none';
+        }
+
+        // 编辑职称
+        function editTitle(titleId, titleName, registrationFee) {
+            document.getElementById('editTitleId').value = titleId;
+            document.getElementById('editTitleName').value = titleName;
+            document.getElementById('editRegistrationFee').value = registrationFee;
+            document.getElementById('editTitleModal').style.display = 'block';
+        }
+
+        // 关闭编辑职称模态框
+        function closeEditTitleModal() {
+            document.getElementById('editTitleModal').style.display = 'none';
+        }
+
+        // 删除职称
+        async function deleteTitle(titleId, titleName, doctorCount) {
+            if (doctorCount > 0) {
+                showMessage(`无法删除职称"${titleName}"，还有 ${doctorCount} 名医生使用该职称`, 'danger');
+                return;
+            }
+            
+            if (confirm(`确定要删除职称"${titleName}"吗？此操作不可撤销！`)) {
+                try {
+                    const data = await apiRequest(`/titles/${titleId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (data.success) {
+                        showMessage(data.message, 'success');
+                        loadTitles();
+                    } else {
+                        showMessage(data.message, 'danger');
+                    }
+                } catch (error) {
+                    showMessage('删除职称失败: ' + error.message, 'danger');
+                }
+            }
+        }
+
+        // 添加职称表单提交
+        document.getElementById('addTitleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const titleName = document.getElementById('titleName').value.trim();
+            const registrationFee = document.getElementById('registrationFee').value;
+            
+            if (!titleName) {
+                showMessage('请输入职称名称', 'danger');
+                return;
+            }
+            
+            if (!registrationFee || parseFloat(registrationFee) < 0) {
+                showMessage('请输入有效的挂号费', 'danger');
+                return;
+            }
+            
+            try {
+                const data = await apiRequest('/titles', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        title_name: titleName,
+                        registration_fee: parseFloat(registrationFee)
+                    })
+                });
+                
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    closeAddTitleModal();
+                    loadTitles();
+                } else {
+                    showMessage(data.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('添加职称失败: ' + error.message, 'danger');
+            }
+        });
+
+        // 编辑职称表单提交
+        document.getElementById('editTitleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const titleId = document.getElementById('editTitleId').value;
+            const titleName = document.getElementById('editTitleName').value.trim();
+            const registrationFee = document.getElementById('editRegistrationFee').value;
+            
+            if (!titleName) {
+                showMessage('请输入职称名称', 'danger');
+                return;
+            }
+            
+            if (!registrationFee || parseFloat(registrationFee) < 0) {
+                showMessage('请输入有效的挂号费', 'danger');
+                return;
+            }
+            
+            try {
+                const data = await apiRequest(`/titles/${titleId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                        title_name: titleName,
+                        registration_fee: parseFloat(registrationFee)
+                    })
+                });
+                
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    closeEditTitleModal();
+                    loadTitles();
+                } else {
+                    showMessage(data.message, 'danger');
+                }
+            } catch (error) {
+                showMessage('更新职称失败: ' + error.message, 'danger');
+            }
+        });
+
+        // ==================== 数据库管理功能 ====================
+        let currentDatabase = 'sqlite';
+        let currentTable = '';
+        let currentPage = 1;
+        let currentEditRecord = null;
+        let currentConflict = null;
+
+        // 初始化数据库管理
+        async function initDatabaseManagement() {
+            try {
+                const response = await apiRequest('/admin/database/tables');
+                if (response.success) {
+                    const tables = response.tables[currentDatabase] || [];
+                    const select = document.getElementById('dbTableSelect');
+                    select.innerHTML = '<option value="">请选择表格</option>';
+                    tables.forEach(table => {
+                        const option = document.createElement('option');
+                        option.value = table;
+                        option.textContent = table;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                showMessage('加载表列表失败: ' + error.message, 'danger');
+            }
+        }
+
+        // 选择数据库
+        async function selectDatabase(dbName) {
+            currentDatabase = dbName;
+            currentTable = '';
+            currentPage = 1;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.db-selector .btn').forEach(btn => {
+                btn.classList.remove('btn-primary', 'active');
+                btn.classList.add('btn-secondary');
+            });
+            const selectedBtn = document.getElementById(`btn-db-${dbName}`);
+            selectedBtn.classList.remove('btn-secondary');
+            selectedBtn.classList.add('btn-primary', 'active');
+            
+            // 更新当前数据库显示
+            const dbNames = {
+                'sqlite': 'SQLite (主库)',
+                'mysql': 'MySQL (从库)',
+                'sqlserver': 'SQL Server (从库)'
+            };
+            document.getElementById('currentDatabase').textContent = dbNames[dbName];
+            
+            // 重新加载表列表
+            await initDatabaseManagement();
+            
+            // 隐藏表格
+            document.getElementById('dbTableContainer').style.display = 'none';
+        }
+
+        // 加载表数据
+        async function loadTableData(page = 1) {
+            const tableName = document.getElementById('dbTableSelect').value;
+            if (!tableName) {
+                showMessage('请先选择表格', 'warning');
+                return;
+            }
+            
+            currentTable = tableName;
+            currentPage = page;
+            
+            document.getElementById('dbLoading').style.display = 'block';
+            document.getElementById('dbTableContainer').style.display = 'none';
+            document.getElementById('conflictContainer').style.display = 'none';
+            
+            try {
+                const response = await apiRequest('/admin/database/table-data', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        database: currentDatabase,
+                        table: tableName,
+                        page: page,
+                        page_size: 20
+                    })
+                });
+                
+                if (response.success) {
+                    displayTableData(response.data);
+                } else {
+                    showMessage('加载数据失败: ' + response.error, 'danger');
+                }
+            } catch (error) {
+                showMessage('加载数据失败: ' + error.message, 'danger');
+            } finally {
+                document.getElementById('dbLoading').style.display = 'none';
+            }
+        }
+
+        // 显示表数据
+        function displayTableData(data) {
+            document.getElementById('currentTable').textContent = currentTable;
+            document.getElementById('totalRecords').textContent = data.total;
+            
+            // 定义需要隐藏的字段
+            const hiddenFields = ['password_hash', 'password', 'passwordhash'];
+            
+            // 定义字段显示优先级和宽度
+            const fieldConfig = {
+                // 主要字段 - 总是显示
+                'admin_id': { priority: 1, width: '60px', label: 'ID' },
+                'patient_id': { priority: 1, width: '60px', label: 'ID' },
+                'doctor_id': { priority: 1, width: '60px', label: 'ID' },
+                'dept_id': { priority: 1, width: '60px', label: 'ID' },
+                'reg_id': { priority: 1, width: '60px', label: 'ID' },
+                'title_id': { priority: 1, width: '60px', label: 'ID' },
+                
+                // 重要字段
+                'username': { priority: 2, width: '100px', label: '用户名' },
+                'name': { priority: 2, width: '80px', label: '姓名' },
+                'dept_name': { priority: 2, width: '120px', label: '科室名' },
+                'title_name': { priority: 2, width: '100px', label: '职称' },
+                'email': { priority: 2, width: '150px', label: '邮箱' },
+                'phone': { priority: 2, width: '110px', label: '电话' },
+                'status': { priority: 2, width: '80px', label: '状态' },
+                
+                // 次要字段
+                'gender': { priority: 3, width: '60px', label: '性别' },
+                'birthday': { priority: 3, width: '100px', label: '生日' },
+                'location': { priority: 3, width: '120px', label: '位置' },
+                'registration_fee': { priority: 3, width: '80px', label: '费用' },
+                'fee': { priority: 3, width: '80px', label: '费用' },
+                'reg_time': { priority: 3, width: '140px', label: '挂号时间' },
+                
+                // 时间戳字段 - 简化显示
+                'created_at': { priority: 4, width: '110px', label: '创建时间' },
+                'updated_at': { priority: 4, width: '110px', label: '更新时间' },
+                
+                // 其他字段
+                'schedule': { priority: 5, width: '150px', label: '排班' },
+                'photo': { priority: 5, width: '100px', label: '照片' }
+            };
+            
+            // 检测是否为移动设备
+            const isMobile = window.innerWidth <= 768;
+            
+            // 过滤和排序列
+            let visibleColumns = data.columns
+                .filter(col => !hiddenFields.some(hidden => col.toLowerCase() === hidden.toLowerCase()))
+                .sort((a, b) => {
+                    const priorityA = fieldConfig[a]?.priority || 6;
+                    const priorityB = fieldConfig[b]?.priority || 6;
+                    return priorityA - priorityB;
+                });
+            
+            // 移动端只显示最重要的列
+            if (isMobile) {
+                visibleColumns = visibleColumns.filter(col => {
+                    const config = fieldConfig[col];
+                    return !config || config.priority <= 3; // 只显示优先级1-3的字段
+                });
+            }
+            
+            // 构建表头
+            const thead = document.getElementById('dataTableHead');
+            thead.innerHTML = '';
+            const headerRow = document.createElement('tr');
+            
+            visibleColumns.forEach(col => {
+                const th = document.createElement('th');
+                const config = fieldConfig[col];
+                
+                // 设置列标题
+                th.textContent = config?.label || col;
+                
+                // 设置列宽
+                if (config?.width) {
+                    th.style.width = config.width;
+                    th.style.minWidth = config.width;
+                }
+                
+                // 主键标识
+                if (data.primary_keys.includes(col)) {
+                    th.innerHTML += ' <span style="color: #f39c12;">🔑</span>';
+                }
+                
+                // 样式优化
+                th.style.fontSize = '12px';
+                th.style.padding = '8px 8px';
+                th.style.whiteSpace = 'nowrap';
+                th.style.fontWeight = 'bold';
+                th.style.backgroundColor = '#f8f9fa';
+                
+                // 根据字段类型设置表头对齐方式
+                if (col.includes('id') || col.includes('fee') || col === 'registration_fee') {
+                    th.style.textAlign = 'center';
+                } else if (col.includes('time') || col.includes('_at')) {
+                    th.style.textAlign = 'center';
+                } else if (col === 'name' || col === 'username' || col === 'title_name' || col === 'dept_name') {
+                    th.style.textAlign = 'center';
+                } else {
+                    th.style.textAlign = 'center';
+                }
+                
+                headerRow.appendChild(th);
+            });
+            
+            // 操作列
+            const actionTh = document.createElement('th');
+            actionTh.textContent = '操作';
+            if (isMobile) {
+                actionTh.style.width = '60px';
+                actionTh.style.minWidth = '60px';
+                actionTh.style.maxWidth = '60px';
+            } else {
+                actionTh.style.width = '120px';
+                actionTh.style.minWidth = '120px';
+            }
+            actionTh.style.fontSize = '12px';
+            actionTh.style.padding = '8px 4px';
+            actionTh.style.textAlign = 'center';
+            headerRow.appendChild(actionTh);
+            
+            thead.appendChild(headerRow);
+            
+            // 构建表体
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+            
+            data.rows.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                visibleColumns.forEach(col => {
+                    const td = document.createElement('td');
+                    const config = fieldConfig[col];
+                    
+                    // 处理数据显示
+                    let displayValue = row[col];
+                    
+                    if (displayValue === null) {
+                        displayValue = 'NULL';
+                        td.style.color = '#999';
+                        td.style.fontStyle = 'italic';
+                    } else {
+                        // 特殊字段处理
+                        if (col.includes('time') || col.includes('_at')) {
+                            // 时间字段简化显示
+                            if (displayValue && displayValue.length > 16) {
+                                displayValue = displayValue.substring(0, 16);
+                            }
+                        } else if (col === 'schedule' && displayValue && displayValue.length > 20) {
+                            // 排班信息截断
+                            displayValue = displayValue.substring(0, 20) + '...';
+                        } else if (col === 'photo' && displayValue) {
+                            // 照片字段显示文件名
+                            displayValue = displayValue.split('/').pop() || displayValue;
+                            if (displayValue.length > 15) {
+                                displayValue = displayValue.substring(0, 15) + '...';
+                            }
+                        }
+                    }
+                    
+                    td.textContent = displayValue;
+                    
+                    // 样式设置
+                    td.style.fontSize = '11px';
+                    td.style.padding = '6px 8px';
+                    
+                    // 根据字段类型设置对齐方式
+                    if (col.includes('id') || col.includes('fee') || col === 'registration_fee') {
+                        td.style.textAlign = 'center';
+                    } else if (col.includes('time') || col.includes('_at')) {
+                        td.style.textAlign = 'center';
+                    } else if (col === 'name' || col === 'username' || col === 'title_name' || col === 'dept_name') {
+                        td.style.textAlign = 'center';
+                    } else {
+                        td.style.textAlign = 'left';
+                    }
+                    
+                    td.style.whiteSpace = 'nowrap';
+                    td.style.overflow = 'hidden';
+                    td.style.textOverflow = 'ellipsis';
+                    td.style.verticalAlign = 'middle';
+                    
+                    if (config?.width) {
+                        td.style.maxWidth = config.width;
+                    }
+                    
+                    tr.appendChild(td);
+                });
+                
+                // 操作按钮
+                const actionTd = document.createElement('td');
+                actionTd.style.padding = '4px 2px';
+                actionTd.style.textAlign = 'center';
+                actionTd.style.whiteSpace = 'nowrap';
+                
+                if (isMobile) {
+                    // 移动端使用垂直排列的小按钮
+                    actionTd.style.padding = '2px';
+                    actionTd.style.minWidth = '60px';
+                    actionTd.style.maxWidth = '60px';
+                    
+                    const buttonContainer = document.createElement('div');
+                    buttonContainer.style.display = 'flex';
+                    buttonContainer.style.flexDirection = 'column';
+                    buttonContainer.style.gap = '1px';
+                    buttonContainer.style.alignItems = 'center';
+                    
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'btn btn-sm btn-primary';
+                    editBtn.innerHTML = '✏️';
+                    editBtn.title = '编辑';
+                    editBtn.style.fontSize = '10px';
+                    editBtn.style.padding = '2px 4px';
+                    editBtn.style.width = '28px';
+                    editBtn.style.height = '24px';
+                    editBtn.style.margin = '0';
+                    editBtn.onclick = () => editRecord(row, data.columns, data.primary_keys);
+                    
+                    const compareBtn = document.createElement('button');
+                    compareBtn.className = 'btn btn-sm btn-info';
+                    compareBtn.innerHTML = '🔍';
+                    compareBtn.title = '对比';
+                    compareBtn.style.fontSize = '10px';
+                    compareBtn.style.padding = '2px 4px';
+                    compareBtn.style.width = '28px';
+                    compareBtn.style.height = '24px';
+                    compareBtn.style.margin = '0';
+                    compareBtn.onclick = () => compareRecord(row, data.primary_keys);
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn btn-sm btn-danger';
+                    deleteBtn.innerHTML = '🗑️';
+                    deleteBtn.title = '删除';
+                    deleteBtn.style.fontSize = '10px';
+                    deleteBtn.style.padding = '2px 4px';
+                    deleteBtn.style.width = '28px';
+                    deleteBtn.style.height = '24px';
+                    deleteBtn.style.margin = '0';
+                    deleteBtn.onclick = () => deleteRecord(row, data.primary_keys);
+                    
+                    buttonContainer.appendChild(editBtn);
+                    buttonContainer.appendChild(compareBtn);
+                    buttonContainer.appendChild(deleteBtn);
+                    actionTd.appendChild(buttonContainer);
+                } else {
+                    // 桌面端使用文字按钮
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'btn btn-sm btn-primary';
+                    editBtn.textContent = '编辑';
+                    editBtn.style.fontSize = '10px';
+                    editBtn.style.padding = '2px 6px';
+                    editBtn.style.marginRight = '2px';
+                    editBtn.onclick = () => editRecord(row, data.columns, data.primary_keys);
+                    
+                    const compareBtn = document.createElement('button');
+                    compareBtn.className = 'btn btn-sm btn-info';
+                    compareBtn.textContent = '对比';
+                    compareBtn.style.fontSize = '10px';
+                    compareBtn.style.padding = '2px 6px';
+                    compareBtn.style.marginRight = '2px';
+                    compareBtn.onclick = () => compareRecord(row, data.primary_keys);
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn btn-sm btn-danger';
+                    deleteBtn.textContent = '删除';
+                    deleteBtn.style.fontSize = '10px';
+                    deleteBtn.style.padding = '2px 6px';
+                    deleteBtn.onclick = () => deleteRecord(row, data.primary_keys);
+                    
+                    actionTd.appendChild(editBtn);
+                    actionTd.appendChild(compareBtn);
+                    actionTd.appendChild(deleteBtn);
+                }
+                
+                tr.appendChild(actionTd);
+                
+                tbody.appendChild(tr);
+            });
+            
+            // 显示分页
+            displayPagination(data);
+            
+            document.getElementById('dbTableContainer').style.display = 'block';
+        }
+
+        // 显示分页
+        function displayPagination(data) {
+            const pagination = document.getElementById('dbPagination');
+            pagination.innerHTML = '';
+            
+            if (data.total_pages <= 1) return;
+            
+            const createPageBtn = (page, text, disabled = false) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-sm ' + (page === data.page ? 'btn-primary' : 'btn-secondary');
+                btn.textContent = text || page;
+                btn.disabled = disabled;
+                btn.onclick = () => loadTableData(page);
+                return btn;
+            };
+            
+            // 上一页
+            pagination.appendChild(createPageBtn(data.page - 1, '上一页', data.page === 1));
+            
+            // 页码
+            for (let i = 1; i <= data.total_pages; i++) {
+                if (i === 1 || i === data.total_pages || (i >= data.page - 2 && i <= data.page + 2)) {
+                    pagination.appendChild(createPageBtn(i));
+                } else if (i === data.page - 3 || i === data.page + 3) {
+                    const span = document.createElement('span');
+                    span.textContent = '...';
+                    span.style.padding = '0 10px';
+                    pagination.appendChild(span);
+                }
+            }
+            
+            // 下一页
+            pagination.appendChild(createPageBtn(data.page + 1, '下一页', data.page === data.total_pages));
+        }
+
+        // 编辑记录
+        function editRecord(row, columns, primaryKeys) {
+            currentEditRecord = { row, columns, primaryKeys };
+            
+            const form = document.getElementById('editDataForm');
+            form.innerHTML = '';
+            
+            columns.forEach(col => {
+                const formGroup = document.createElement('div');
+                formGroup.className = 'form-group';
+                
+                const label = document.createElement('label');
+                label.textContent = col;
+                if (primaryKeys.includes(col)) {
+                    label.innerHTML += ' <span style="color: #f39c12;">🔑 (主键)</span>';
+                }
+                
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'form-control';
+                input.id = `edit-${col}`;
+                input.value = row[col] !== null ? row[col] : '';
+                
+                // 主键不可编辑
+                if (primaryKeys.includes(col)) {
+                    input.disabled = true;
+                    input.style.backgroundColor = '#f5f5f5';
+                }
+                
+                formGroup.appendChild(label);
+                formGroup.appendChild(input);
+                form.appendChild(formGroup);
+            });
+            
+            document.getElementById('editDataModal').style.display = 'block';
+        }
+
+        // 保存数据更改
+        async function saveDataChanges() {
+            if (!currentEditRecord) return;
+            
+            const { row, columns, primaryKeys } = currentEditRecord;
+            
+            // 收集更新的数据
+            const updates = {};
+            const primaryKey = {};
+            
+            columns.forEach(col => {
+                const input = document.getElementById(`edit-${col}`);
+                if (input && !input.disabled) {
+                    const newValue = input.value.trim();
+                    if (newValue !== (row[col] || '')) {
+                        updates[col] = newValue || null;
+                    }
+                }
+                if (primaryKeys.includes(col)) {
+                    primaryKey[col] = row[col];
+                }
+            });
+            
+            if (Object.keys(updates).length === 0) {
+                showMessage('没有修改任何数据', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await apiRequest('/admin/database/update-record', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        database: currentDatabase,
+                        table: currentTable,
+                        primary_key: primaryKey,
+                        updates: updates
+                    })
+                });
+                
+                if (response.success) {
+                    showMessage('数据更新成功', 'success');
+                    closeEditDataModal();
+                    loadTableData(currentPage);
+                } else {
+                    showMessage('更新失败: ' + response.error, 'danger');
+                }
+            } catch (error) {
+                showMessage('更新失败: ' + error.message, 'danger');
+            }
+        }
+
+        // 对比记录
+        async function compareRecord(row, primaryKeys) {
+            const primaryKey = {};
+            primaryKeys.forEach(col => {
+                primaryKey[col] = row[col];
+            });
+            
+            // 根据表名确定主键字段
+            const pkFieldMap = {
+                'admin': 'admin_id',
+                'patient': 'patient_id', 
+                'doctor': 'doctor_id',
+                'department': 'dept_id',
+                'registration': 'reg_id',
+                'title': 'title_id'
+            };
+            const pkField = pkFieldMap[currentTable] || Object.keys(primaryKey)[0];
+            const recordId = primaryKey[pkField];
+            
+            try {
+                const response = await apiRequest('/admin/database/compare-records', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        table: currentTable,
+                        record_id: recordId
+                    })
+                });
+                
+                if (response.success) {
+                    displayComparisonResult(response, currentTable, recordId);
+                } else {
+                    showMessage('对比失败: ' + response.error, 'danger');
+                }
+            } catch (error) {
+                showMessage('对比失败: ' + error.message, 'danger');
+            }
+        }
+
+        // 显示对比结果
+        function displayComparisonResult(result, tableName, recordId) {
+            const details = document.getElementById('conflictDetails');
+            details.innerHTML = '<h4>三库数据对比</h4>';
+            
+            const databases = ['sqlite', 'mysql', 'sqlserver'];
+            databases.forEach(db => {
+                const data = result.data[db];
+                const section = document.createElement('div');
+                section.style.marginBottom = '15px';
+                section.style.padding = '10px';
+                section.style.border = '1px solid #ddd';
+                section.style.borderRadius = '4px';
+                
+                const title = document.createElement('h5');
+                title.textContent = db.toUpperCase();
+                title.style.color = db === 'sqlite' ? '#3498db' : '#95a5a6';
+                section.appendChild(title);
+                
+                if (data && !data.error) {
+                    const table = document.createElement('table');
+                    table.style.width = '100%';
+                    table.style.fontSize = '12px';
+                    
+                    // 需要隐藏的敏感字段
+                    const hiddenFields = ['password_hash', 'password', 'passwordhash'];
+                    
+                    for (const [key, value] of Object.entries(data)) {
+                        // 跳过密码相关字段
+                        if (hiddenFields.some(field => key.toLowerCase() === field.toLowerCase())) {
+                            continue;
+                        }
+                        
+                        const tr = document.createElement('tr');
+                        const tdKey = document.createElement('td');
+                        tdKey.textContent = key;
+                        tdKey.style.fontWeight = 'bold';
+                        tdKey.style.width = '30%';
+                        
+                        const tdValue = document.createElement('td');
+                        tdValue.textContent = value !== null ? value : 'NULL';
+                        
+                        tr.appendChild(tdKey);
+                        tr.appendChild(tdValue);
+                        table.appendChild(tr);
+                    }
+                    section.appendChild(table);
+                } else if (data === null) {
+                    section.innerHTML += '<p style="color: #e74c3c;">记录不存在</p>';
+                } else {
+                    section.innerHTML += `<p style="color: #e74c3c;">错误: ${data.error}</p>`;
+                }
+                
+                details.appendChild(section);
+            });
+            
+            // 显示冲突
+            if (result.has_conflicts) {
+                const conflictSection = document.createElement('div');
+                conflictSection.style.marginTop = '20px';
+                conflictSection.style.padding = '15px';
+                conflictSection.style.backgroundColor = '#fff3cd';
+                conflictSection.style.borderRadius = '4px';
+                
+                const conflictTitle = document.createElement('h5');
+                conflictTitle.textContent = '检测到冲突';
+                conflictTitle.style.color = '#856404';
+                conflictSection.appendChild(conflictTitle);
+                
+                // 需要隐藏的敏感字段
+                const hiddenFields = ['password_hash', 'password', 'passwordhash'];
+                
+                result.conflicts.forEach(conflict => {
+                    // 跳过密码字段的冲突显示
+                    if (conflict.field && hiddenFields.some(field => conflict.field.toLowerCase() === field.toLowerCase())) {
+                        return;
+                    }
+                    
+                    const p = document.createElement('p');
+                    if (conflict.type === 'data_mismatch') {
+                        p.innerHTML = `字段 <strong>${conflict.field}</strong> 在 ${conflict.databases.join(' 和 ')} 中不一致`;
+                        const values = document.createElement('div');
+                        values.style.marginLeft = '20px';
+                        values.style.fontSize = '12px';
+                        for (const [db, val] of Object.entries(conflict.values)) {
+                            values.innerHTML += `${db}: ${val}<br>`;
+                        }
+                        p.appendChild(values);
+                    } else {
+                        p.textContent = conflict.message;
+                    }
+                    conflictSection.appendChild(p);
+                });
+                
+                details.appendChild(conflictSection);
+                
+                // 保存当前冲突信息
+                currentConflict = {
+                    table: tableName,
+                    record_id: recordId
+                };
+            }
+            
+            document.getElementById('conflictResolveModal').style.display = 'block';
+        }
+
+        // 查看所有冲突
+        async function showConflicts() {
+            document.getElementById('dbLoading').style.display = 'block';
+            document.getElementById('dbTableContainer').style.display = 'none';
+            document.getElementById('conflictContainer').style.display = 'none';
+            
+            try {
+                const response = await apiRequest('/admin/database/find-all-conflicts', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        table: currentTable || null
+                    })
+                });
+                
+                if (response.success) {
+                    displayConflictList(response.conflicts);
+                } else {
+                    showMessage('查找冲突失败: ' + response.error, 'danger');
+                }
+            } catch (error) {
+                showMessage('查找冲突失败: ' + error.message, 'danger');
+            } finally {
+                document.getElementById('dbLoading').style.display = 'none';
+            }
+        }
+
+        // 显示冲突列表
+        function displayConflictList(conflicts) {
+            const container = document.getElementById('conflictList');
+            container.innerHTML = '';
+            
+            if (conflicts.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #27ae60; padding: 20px;">未发现数据冲突</p>';
+            } else {
+                conflicts.forEach((conflict, index) => {
+                    const card = document.createElement('div');
+                    card.style.border = '1px solid #e74c3c';
+                    card.style.borderRadius = '4px';
+                    card.style.padding = '15px';
+                    card.style.marginBottom = '10px';
+                    card.style.backgroundColor = '#fff5f5';
+                    
+                    card.innerHTML = `
+                        <h5>冲突 #${index + 1}</h5>
+                        <p><strong>表:</strong> ${conflict.table}</p>
+                        <p><strong>记录ID:</strong> ${conflict.record_id}</p>
+                        <p><strong>冲突数量:</strong> ${conflict.conflicts.length}</p>
+                        <button class="btn btn-sm btn-primary" onclick="resolveConflictById('${conflict.table}', ${conflict.record_id})">
+                            解决冲突
+                        </button>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+            }
+            
+            document.getElementById('conflictContainer').style.display = 'block';
+        }
+
+        // 解决冲突
+        async function resolveConflictById(table, recordId) {
+            currentConflict = { table, record_id: recordId };
+            
+            // 先获取详细信息
+            try {
+                const response = await apiRequest('/admin/database/compare-records', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        table: table,
+                        record_id: recordId
+                    })
+                });
+                
+                if (response.success) {
+                    displayComparisonResult(response, table, recordId);
+                }
+            } catch (error) {
+                showMessage('获取冲突详情失败: ' + error.message, 'danger');
+            }
+        }
+
+        // 执行冲突解决
+        async function executeConflictResolution() {
+            if (!currentConflict) {
+                showMessage('没有选择要解决的冲突', 'warning');
+                return;
+            }
+            
+            const strategy = document.getElementById('conflictStrategy').value;
+            
+            // 验证参数
+            if (!currentConflict.table || !currentConflict.record_id) {
+                showMessage('冲突信息不完整，请重新选择记录', 'warning');
+                console.error('冲突信息:', currentConflict);
+                return;
+            }
+            
+            console.log('发送冲突解决请求:', {
+                table: currentConflict.table,
+                record_id: currentConflict.record_id,
+                strategy: strategy
+            });
+            
+            try {
+                const response = await apiRequest('/admin/database/resolve-conflict', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        table: currentConflict.table,
+                        record_id: currentConflict.record_id,
+                        strategy: strategy
+                    })
+                });
+                
+                if (response.success) {
+                    showMessage('冲突解决成功', 'success');
+                    closeConflictResolveModal();
+                    if (currentTable) {
+                        loadTableData(currentPage);
+                    }
+                } else {
+                    showMessage('冲突解决失败: ' + response.error, 'danger');
+                }
+            } catch (error) {
+                showMessage('冲突解决失败: ' + error.message, 'danger');
+            }
+        }
+
+        // 对比所有数据库
+        async function compareAllDatabases() {
+            if (!currentTable) {
+                showMessage('请先选择表格', 'warning');
+                return;
+            }
+            
+            showMessage('正在对比三个数据库的数据...', 'info');
+            await showConflicts();
+        }
+
+        // 删除记录
+        let currentDeleteRecord = null;
+        
+        function deleteRecord(row, primaryKeys) {
+            currentDeleteRecord = { row, primaryKeys };
+            
+            // 显示删除信息
+            const dbNames = {
+                'sqlite': 'SQLite (主库)',
+                'mysql': 'MySQL (从库)',
+                'sqlserver': 'SQL Server (从库)'
+            };
+            
+            document.getElementById('deleteDatabase').textContent = dbNames[currentDatabase];
+            document.getElementById('deleteTable').textContent = currentTable;
+            
+            // 显示记录详情
+            const infoDiv = document.getElementById('deleteRecordInfo');
+            infoDiv.innerHTML = '';
+            
+            // 显示主键信息
+            primaryKeys.forEach(pk => {
+                const p = document.createElement('p');
+                p.style.margin = '5px 0';
+                p.innerHTML = `<strong>${pk}:</strong> ${row[pk]}`;
+                infoDiv.appendChild(p);
+            });
+            
+            // 显示其他关键字段（如name等）
+            const displayFields = ['name', 'username', 'dept_name', 'title_name'];
+            displayFields.forEach(field => {
+                if (row[field] && !primaryKeys.includes(field)) {
+                    const p = document.createElement('p');
+                    p.style.margin = '5px 0';
+                    p.innerHTML = `<strong>${field}:</strong> ${row[field]}`;
+                    infoDiv.appendChild(p);
+                }
+            });
+            
+            document.getElementById('deleteConfirmModal').style.display = 'block';
+        }
+        
+        // 确认删除数据库记录
+        async function confirmDatabaseDelete() {
+            if (!currentDeleteRecord) return;
+            
+            const { row, primaryKeys } = currentDeleteRecord;
+            
+            // 构建主键对象
+            const primaryKey = {};
+            primaryKeys.forEach(col => {
+                primaryKey[col] = row[col];
+            });
+            
+            try {
+                const response = await apiRequest('/admin/database/delete-record', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        database: currentDatabase,
+                        table: currentTable,
+                        primary_key: primaryKey
+                    })
+                });
+                
+                if (response.success) {
+                    showMessage('记录删除成功', 'success');
+                    closeDeleteConfirmModal();
+                    loadTableData(currentPage);
+                } else {
+                    showMessage('删除失败: ' + response.error, 'danger');
+                }
+            } catch (error) {
+                showMessage('删除失败: ' + error.message, 'danger');
+            }
+        }
+        
+        // 关闭模态框
+        function closeEditDataModal() {
+            document.getElementById('editDataModal').style.display = 'none';
+            currentEditRecord = null;
+        }
+
+        function closeConflictResolveModal() {
+            document.getElementById('conflictResolveModal').style.display = 'none';
+            currentConflict = null;
+        }
+        
+        function closeDeleteConfirmModal() {
+            document.getElementById('deleteConfirmModal').style.display = 'none';
+            currentDeleteRecord = null;
+        }
+
+        // ==================== 数据库同步配置功能 ====================
+        let selectedStrategy = 'timestamp_priority';
+
+        // 初始化同步配置
+        async function initSyncConfig() {
+            try {
+                await loadSyncConfig();
+                await loadSchedulerStatus();
+            } catch (error) {
+                console.error('初始化同步配置失败:', error);
+            }
+        }
+
+        // 格式化间隔时间显示
+        function formatInterval(minutes) {
+            console.log('formatInterval 被调用，参数:', minutes);
+            
+            if (minutes < 1) {
+                // 小于1分钟，显示秒数
+                const seconds = Math.round(minutes * 60);
+                const result = `${seconds}秒`;
+                console.log('格式化结果 (秒):', result);
+                return result;
+            } else if (minutes < 60) {
+                // 小于60分钟，显示分钟（保留1位小数）
+                const result = `${minutes.toFixed(1)}分钟`;
+                console.log('格式化结果 (分钟):', result);
+                return result;
+            } else {
+                // 大于等于60分钟，显示小时和分钟
+                const hours = Math.floor(minutes / 60);
+                const remainingMinutes = Math.round(minutes % 60);
+                const result = remainingMinutes === 0 ? `${hours}小时` : `${hours}小时${remainingMinutes}分钟`;
+                console.log('格式化结果 (小时):', result);
+                return result;
+            }
+        }
+
+        // 加载同步配置
+        async function loadSyncConfig() {
+            try {
+                const response = await apiRequest('/admin/sync-config/get');
+                if (response.success && response.config) {
+                    const config = response.config;
+                    document.getElementById('checkIntervalInput').value = config.check_interval_minutes;
+                    
+                    // 格式化显示间隔时间
+                    const intervalText = formatInterval(config.check_interval_minutes);
+                    document.getElementById('currentInterval').textContent = intervalText;
+                    
+                    selectedStrategy = config.default_strategy;
+                    
+                    // 设置选中的策略
+                    const radio = document.querySelector(`input[name="syncStrategy"][value="${selectedStrategy}"]`);
+                    if (radio) {
+                        radio.checked = true;
+                        
+                        // 更新边框样式
+                        document.querySelectorAll('.strategy-option').forEach(option => {
+                            option.style.border = '2px solid #e0e0e0';
+                        });
+                        const selectedOption = radio.closest('.strategy-option');
+                        if (selectedOption) {
+                            selectedOption.style.border = '2px solid #007bff';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('加载同步配置失败:', error);
+            }
+        }
+
+        // 加载调度器状态
+        async function loadSchedulerStatus() {
+            try {
+                const response = await apiRequest('/admin/sync-config/scheduler/status');
+                if (response.success && response.status) {
+                    updateSchedulerUI(response.status.running);
+                    
+                    // 格式化显示间隔时间
+                    const intervalText = formatInterval(response.status.check_interval_minutes);
+                    document.getElementById('currentInterval').textContent = intervalText;
+                }
+            } catch (error) {
+                console.error('加载调度器状态失败:', error);
+            }
+        }
+
+        // 更新调度器UI
+        function updateSchedulerUI(isRunning) {
+            console.log('更新调度器UI，运行状态:', isRunning);
+            
+            const statusDot = document.getElementById('schedulerStatus');
+            const statusText = document.getElementById('schedulerStatusText');
+            const toggleBtn = document.getElementById('schedulerToggleBtn');
+            const btnIcon = document.getElementById('schedulerBtnIcon');
+            const btnText = document.getElementById('schedulerBtnText');
+
+            if (!toggleBtn || !btnIcon || !btnText) {
+                console.error('找不到按钮元素');
+                return;
+            }
+
+            if (isRunning) {
+                // 调度器运行中 - 显示暂停按钮
+                statusDot.style.color = '#28a745';
+                statusText.textContent = '运行中';
+                
+                // 强制更新按钮样式
+                toggleBtn.className = 'btn btn-warning';
+                toggleBtn.style.backgroundColor = '#ffc107';
+                toggleBtn.style.borderColor = '#ffc107';
+                toggleBtn.style.color = '#212529';
+                
+                btnIcon.textContent = '⏸';
+                btnText.textContent = '暂停调度器';
+                
+                console.log('按钮已设置为暂停模式');
+            } else {
+                // 调度器已停止 - 显示启动按钮
+                statusDot.style.color = '#dc3545';
+                statusText.textContent = '已停止';
+                
+                // 强制更新按钮样式
+                toggleBtn.className = 'btn btn-success';
+                toggleBtn.style.backgroundColor = '#28a745';
+                toggleBtn.style.borderColor = '#28a745';
+                toggleBtn.style.color = '#fff';
+                
+                btnIcon.textContent = '▶';
+                btnText.textContent = '启动调度器';
+                
+                console.log('按钮已设置为启动模式');
+            }
+        }
+
+        // 选择同步策略
+        async function selectStrategy(strategy) {
+            selectedStrategy = strategy;
+            const radio = document.querySelector(`input[name="syncStrategy"][value="${strategy}"]`);
+            if (radio) radio.checked = true;
+            
+            // 更新边框样式
+            document.querySelectorAll('.strategy-option').forEach(option => {
+                option.style.border = '2px solid #e0e0e0';
+            });
+            const selectedOption = radio.closest('.strategy-option');
+            if (selectedOption) {
+                selectedOption.style.border = '2px solid #007bff';
+            }
+            
+            // 自动保存默认策略
+            try {
+                const response = await apiRequest('/admin/sync-config/update', 'POST', {
+                    default_strategy: strategy
+                });
+
+                if (response.success) {
+                    showMessage(`默认同步策略已设置为：${getStrategyName(strategy)}`, 'success');
+                } else {
+                    showMessage(response.error || '保存策略失败', 'error');
+                }
+            } catch (error) {
+                console.error('保存默认策略失败:', error);
+                showMessage('保存默认策略失败', 'error');
+            }
+        }
+
+        // 更新同步间隔
+        async function updateSyncInterval() {
+            try {
+                const interval = parseFloat(document.getElementById('checkIntervalInput').value);
+                
+                if (isNaN(interval) || interval < 0.17 || interval > 1440) {
+                    showMessage('检查间隔必须在0.17-1440分钟之间（10秒-24小时）', 'error');
+                    return;
+                }
+
+                const response = await apiRequest('/admin/sync-config/update', 'POST', {
+                    check_interval_minutes: interval
+                });
+
+                if (response.success) {
+                    showMessage(response.message || '同步间隔已更新', 'success');
+                    
+                    // 格式化显示间隔时间
+                    const intervalText = formatInterval(interval);
+                    document.getElementById('currentInterval').textContent = intervalText;
+                } else {
+                    showMessage(response.error || '更新失败', 'error');
+                }
+            } catch (error) {
+                console.error('更新同步间隔失败:', error);
+                showMessage('更新同步间隔失败', 'error');
+            }
+        }
+
+        // 切换调度器状态
+        async function toggleScheduler() {
+            try {
+                console.log('开始切换调度器状态');
+                
+                // 先获取当前真实状态
+                const statusResponse = await apiRequest('/admin/sync-config/scheduler/status');
+                
+                if (!statusResponse.success) {
+                    showMessage('无法获取调度器状态', 'error');
+                    return;
+                }
+                
+                const isCurrentlyRunning = statusResponse.status.running;
+                console.log('当前调度器状态:', isCurrentlyRunning ? '运行中' : '已停止');
+                
+                if (isCurrentlyRunning) {
+                    // 当前运行中，执行停止操作
+                    console.log('准备停止调度器');
+                    
+                    // 立即更新UI为停止状态（乐观更新）
+                    updateSchedulerUI(false);
+                    
+                    const response = await apiRequest('/admin/sync-config/scheduler/stop', 'POST');
+                    
+                    if (response.success) {
+                        showMessage('调度器已停止', 'success');
+                        // 确保UI是停止状态
+                        updateSchedulerUI(false);
+                    } else {
+                        // 可能已经停止了，检查是否是"未在运行"的错误
+                        if (response.error && response.error.includes('调度器未在运行')) {
+                            showMessage('调度器已经是停止状态', 'info');
+                            updateSchedulerUI(false);
+                        } else {
+                            showMessage(response.error || '停止失败', 'error');
+                            // 恢复到运行状态
+                            updateSchedulerUI(true);
+                            await loadSchedulerStatus();
+                        }
+                    }
+                } else {
+                    // 当前已停止，执行启动操作
+                    console.log('准备启动调度器');
+                    
+                    // 立即更新UI为运行状态（乐观更新）
+                    updateSchedulerUI(true);
+                    
+                    const response = await apiRequest('/admin/sync-config/scheduler/start', 'POST');
+                    
+                    if (response.success) {
+                        showMessage('调度器已启动', 'success');
+                        // 确保UI是运行状态
+                        updateSchedulerUI(true);
+                    } else {
+                        // 可能已经启动了，检查是否是"已在运行"的错误
+                        if (response.error && response.error.includes('调度器已在运行')) {
+                            showMessage('调度器已经在运行中', 'info');
+                            updateSchedulerUI(true);
+                        } else {
+                            showMessage(response.error || '启动失败', 'error');
+                            // 恢复到停止状态
+                            updateSchedulerUI(false);
+                            await loadSchedulerStatus();
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('切换调度器状态失败:', error);
+                showMessage(error.message || '操作失败', 'error');
+                // 刷新状态以确保UI正确
+                await loadSchedulerStatus();
+            }
+        }
+
+        // 手动同步
+        async function manualSync() {
+            if (!confirm('确定要立即同步所有数据库吗？\n\n将使用选定的策略：' + getStrategyName(selectedStrategy))) {
+                return;
+            }
+
+            try {
+                showMessage('正在同步，请稍候...', 'info');
+                
+                const response = await apiRequest('/admin/sync-config/manual-sync', 'POST', {
+                    strategy: selectedStrategy
+                });
+
+                if (response.success) {
+                    showMessage(response.message || '同步完成', 'success');
+                    
+                    // 显示详细结果
+                    if (response.total_conflicts > 0) {
+                        const details = `\n共发现 ${response.total_conflicts} 个冲突\n成功解决 ${response.resolved_conflicts} 个`;
+                        alert('同步完成！' + details);
+                    }
+                } else {
+                    showMessage(response.error || '同步失败', 'error');
+                }
+            } catch (error) {
+                console.error('手动同步失败:', error);
+                showMessage('手动同步失败', 'error');
+            }
+        }
+
+        // 获取策略名称
+        function getStrategyName(strategy) {
+            const names = {
+                'timestamp_priority': '时间戳优先',
+                'primary_priority': 'SQLite优先',
+                'mysql_priority': 'MySQL优先',
+                'sqlserver_priority': 'SQL Server优先'
+            };
+            return names[strategy] || strategy;
+        }
+
+        // 移动端侧边栏切换
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (sidebar.classList.contains('mobile-open')) {
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('active');
+            } else {
+                sidebar.classList.add('mobile-open');
+                overlay.classList.add('active');
+            }
+        }
+        
+        // 窗口大小改变时的处理
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            if (window.innerWidth > 768) {
+                // 桌面端时移除移动端类
+                sidebar.classList.remove('mobile-open');
+                overlay.classList.remove('active');
+            }
+        });
+        
+        // 页面加载时初始化同步配置
+        document.addEventListener('DOMContentLoaded', function() {
+            // 延迟初始化，确保在数据库管理部分初始化之后
+            setTimeout(initSyncConfig, 1000);
+            
+            // 额外的显示修复 - 确保间隔显示正确
+            setTimeout(() => {
+                const currentInterval = document.getElementById('currentInterval');
+                if (currentInterval && currentInterval.textContent.includes('undefined')) {
+                    currentInterval.textContent = '10分钟';
+                    console.log('当前显示: 10分钟');
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

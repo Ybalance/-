@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>患者界面 - 医院挂号系统</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/booking-style.css">
+    <link rel="stylesheet" href="assets/responsive.css">
+    <link rel="stylesheet" href="assets/refresh-styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="assets/realtime-sync.js"></script>
+    <script src="assets/enhanced-api.js"></script>
+    <script src="assets/instant-response.js"></script>
+    <script src="assets/on-demand-refresh.js"></script>
+</head>
+<body>
+    <!-- 消息提示 -->
+    <div id="message" class="alert" style="display: none;"></div>
+
+    <!-- 移动端菜单按钮 -->
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </button>
+
+    <!-- 侧边栏遮罩层 -->
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="admin-layout">
+        <!-- 侧边栏导航 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>医院挂号系统</h2>
+                <p class="sidebar-subtitle">患者端</p>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" onclick="showSection('booking')">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-text">预约挂号</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('myRegistrations')">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-text">我的挂号</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('profile')">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">个人信息</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <span class="user-icon">👤</span>
+                    <div class="user-details">
+                        <div class="user-name" id="username"></div>
+                        <div class="user-role">患者</div>
+                    </div>
+                </div>
+                
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </aside>
+        
+        <!-- 主内容区 -->
+        <main class="main-content">
+
+            <!-- 预约挂号 -->
+            <div id="section-booking" class="content-section active">
+                <div class="card">
+                    <h2>预约挂号</h2>
+                    
+                    <!-- 选择科室 -->
+                    <div class="form-group">
+                        <label>选择科室</label>
+                        <select id="deptSelect" class="form-control" onchange="onDeptSelect()">
+                            <option value="">请选择科室</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 选择日期和时段的表格 -->
+                    <div id="scheduleTableContainer" style="display: none;">
+                        <h3 style="margin: 1.5rem 0 1rem 0; color: #333;">选择就诊时间</h3>
+                        <div class="schedule-table-container">
+                            <table class="schedule-table booking-schedule-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 100px;">时段</th>
+                                        <th id="date0"></th>
+                                        <th id="date1"></th>
+                                        <th id="date2"></th>
+                                        <th id="date3"></th>
+                                        <th id="date4"></th>
+                                        <th id="date5"></th>
+                                        <th id="date6"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>上午</strong><br><small>00:00-12:00</small></td>
+                                        <td id="slot_0_am" class="time-slot" onclick="selectSlot(0, 'am')"></td>
+                                        <td id="slot_1_am" class="time-slot" onclick="selectSlot(1, 'am')"></td>
+                                        <td id="slot_2_am" class="time-slot" onclick="selectSlot(2, 'am')"></td>
+                                        <td id="slot_3_am" class="time-slot" onclick="selectSlot(3, 'am')"></td>
+                                        <td id="slot_4_am" class="time-slot" onclick="selectSlot(4, 'am')"></td>
+                                        <td id="slot_5_am" class="time-slot" onclick="selectSlot(5, 'am')"></td>
+                                        <td id="slot_6_am" class="time-slot" onclick="selectSlot(6, 'am')"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>下午</strong><br><small>12:00-24:00</small></td>
+                                        <td id="slot_0_pm" class="time-slot" onclick="selectSlot(0, 'pm')"></td>
+                                        <td id="slot_1_pm" class="time-slot" onclick="selectSlot(1, 'pm')"></td>
+                                        <td id="slot_2_pm" class="time-slot" onclick="selectSlot(2, 'pm')"></td>
+                                        <td id="slot_3_pm" class="time-slot" onclick="selectSlot(3, 'pm')"></td>
+                                        <td id="slot_4_pm" class="time-slot" onclick="selectSlot(4, 'pm')"></td>
+                                        <td id="slot_5_pm" class="time-slot" onclick="selectSlot(5, 'pm')"></td>
+                                        <td id="slot_6_pm" class="time-slot" onclick="selectSlot(6, 'pm')"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div style="margin-top: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 8px; font-size: 0.9rem; color: #666;">
+                            <strong>说明：</strong>点击表格中的医生数量即可选择该时段进行预约
+                        </div>
+                    </div>
+                    
+                    <!-- 选择医生 -->
+                    <div id="doctorSelectContainer" style="display: none; margin-top: 2rem;">
+                        <h3 style="margin-bottom: 1rem; color: #333;">选择医生</h3>
+                        <div id="doctorCards" class="selection-cards">
+                            <!-- 医生卡片将动态加载 -->
+                        </div>
+                        
+                        <!-- 选择具体时间 -->
+                        <div id="timeSelectContainer" style="display: none; margin-top: 1.5rem;">
+                            <h3 style="margin-bottom: 1rem; color: #333;">选择具体时间</h3>
+                            <div class="form-group">
+                                <select id="specificTimeSelect" class="form-control" onchange="onSpecificTimeSelect()">
+                                    <option value="">请选择具体时间</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- 预约信息确认 -->
+                        <div id="confirmInfo" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px;">
+                            <h4 style="margin-bottom: 1rem;">预约信息</h4>
+                            <table class="table" style="margin-bottom: 1rem;">
+                                <tr>
+                                    <td style="width: 100px; font-weight: 500;">科室</td>
+                                    <td id="confirmDept">-</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">日期</td>
+                                    <td id="confirmDate">-</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">时段</td>
+                                    <td id="confirmTime">-</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">医生</td>
+                                    <td id="confirmDoctor">-</td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight: 500;">挂号费</td>
+                                    <td id="confirmFee" style="color: #667eea; font-weight: 600; font-size: 1.1rem;">¥0.00</td>
+                                </tr>
+                            </table>
+                            <div style="text-align: right;">
+                                <button class="btn btn-secondary" onclick="resetBooking()">重新选择</button>
+                                <button class="btn btn-primary" onclick="confirmBooking()">确认预约</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 我的挂号记录 -->
+            <div id="section-myRegistrations" class="content-section">
+                <!-- 搜索功能 -->
+                <div class="card">
+                    <h2>搜索挂号记录</h2>
+                    <div class="grid grid-3">
+                        <div class="form-group">
+                            <label for="searchRegId">挂号ID</label>
+                            <input type="text" id="searchRegId" class="form-control" placeholder="输入挂号ID">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchDoctor">医生姓名</label>
+                            <input type="text" id="searchDoctor" class="form-control" placeholder="输入医生姓名">
+                        </div>
+                        <div class="form-group">
+                            <label for="searchDept">科室</label>
+                            <input type="text" id="searchDept" class="form-control" placeholder="输入科室名称">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="searchRegistrations()">搜索</button>
+                    <button class="btn btn-secondary" onclick="clearSearch()">清空</button>
+                </div>
+
+                <!-- 挂号记录列表 -->
+                <div class="card">
+                    <h2>我的挂号记录</h2>
+                    <div class="loading" id="registrationsLoading">
+                        <div class="spinner"></div>
+                    </div>
+                    <div id="registrationsContainer" style="display: none;">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>挂号ID</th>
+                                    <th>医生</th>
+                                    <th>职称</th>
+                                    <th>科室</th>
+                                    <th>科室位置</th>
+                                    <th>预约时间</th>
+                                    <th>挂号费</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="registrationsTable">
+                            </tbody>
+                        </table>
+                        <div id="noRegistrations" style="display: none; text-align: center; padding: 2rem; color: #666;">
+                            暂无挂号记录
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 个人信息 -->
+            <div id="section-profile" class="content-section">
+                <div class="card" style="max-width: 800px; margin: 0 auto;">
+                    <h2>个人信息</h2>
+                    
+                    <!-- 累计挂号费显示 -->
+                    <div style="background: #f0f9ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 4px solid #3b82f6;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 0.95rem; color: #64748b;">累计挂号费用</span>
+                            <span style="font-size: 1.5rem; font-weight: bold; color: #3b82f6;" id="totalFeeDisplay">¥0.00</span>
+                        </div>
+                    </div>
+                    
+                    <form id="profileForm" onsubmit="updateProfile(event)">
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label for="profileName">姓名 *</label>
+                                <input type="text" id="profileName" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profilePhone">手机号码</label>
+                                <input type="tel" id="profilePhone" class="form-control" pattern="[0-9]{11}" title="请输入11位手机号码">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label for="profilePassword">新密码（留空则不修改）</label>
+                                <input type="password" id="profilePassword" class="form-control" placeholder="如需修改密码请输入新密码">
+                            </div>
+                            <div class="form-group">
+                                <label for="profilePasswordConfirm">确认新密码</label>
+                                <input type="password" id="profilePasswordConfirm" class="form-control" placeholder="再次输入新密码">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">保存修改</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 取消挂号确认模态框 -->
+    <div id="cancelModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>确认取消挂号</h3>
+                <span class="close" onclick="closeCancelModal()">&times;</span>
+            </div>
+            <p>确定要取消这个挂号吗？取消后无法恢复。</p>
+            <div style="text-align: right; margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="closeCancelModal()">取消</button>
+                <button class="btn btn-danger" onclick="confirmCancel()">确认取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/config.js"></script>
+    <script>
+        let currentCancelId = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            if (!localStorage.getItem('token') || localStorage.getItem('role') !== 'patient') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Set username
+            document.getElementById('username').textContent = localStorage.getItem('username');
+
+            // Load initial data
+            loadDepartments();
+        });
+
+        function showSection(sectionName) {
+            console.log('Switching to section:', sectionName);
+            
+            // 隐藏所有内容区域
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 移除所有导航项的active类
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // 显示选中的内容区域
+            const targetSection = document.getElementById(`section-${sectionName}`);
+            console.log('Target section:', targetSection);
+            if (targetSection) {
+                targetSection.classList.add('active');
+                console.log('Section activated');
+            } else {
+                console.error('Section not found:', `section-${sectionName}`);
+            }
+            
+            // 高亮选中的导航项
+            if (window.event && window.event.target) {
+                const navItem = window.event.target.closest('.nav-item');
+                if (navItem) {
+                    navItem.classList.add('active');
+                }
+            } else {
+                // 如果没有event，手动查找并高亮对应的导航项
+                const navItems = document.querySelectorAll('.nav-item');
+                navItems.forEach(item => {
+                    if (item.getAttribute('onclick')?.includes(sectionName)) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+            
+            // 加载对应数据
+            if (sectionName === 'myRegistrations') {
+                loadRegistrations();
+            } else if (sectionName === 'profile') {
+                loadProfile();
+            } else if (sectionName === 'booking') {
+                // 重置预约表单
+                resetBooking();
+            }
+        }
+
+        // Booking state
+        let bookingState = {
+            department: null,
+            dateIndex: null,
+            date: null,
+            timeSlot: null,
+            doctor: null,
+            specificTime: null
+        };
+
+        let datesList = [];
+
+        async function loadDepartments() {
+            try {
+                const departments = await apiRequest('/departments');
+                const select = document.getElementById('deptSelect');
+                select.innerHTML = '<option value="">请选择科室</option>';
+                
+                departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept.dept_id;
+                    option.textContent = `${dept.dept_name} - ${dept.location}`;
+                    option.dataset.deptName = dept.dept_name;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                showMessage('加载科室信息失败: ' + error.message, 'danger');
+            }
+        }
+
+        async function onDeptSelect() {
+            const select = document.getElementById('deptSelect');
+            const deptId = select.value;
+            
+            if (!deptId) {
+                document.getElementById('scheduleTableContainer').style.display = 'none';
+                document.getElementById('doctorSelectContainer').style.display = 'none';
+                return;
+            }
+            
+            bookingState.department = {
+                dept_id: deptId,
+                dept_name: select.options[select.selectedIndex].dataset.deptName
+            };
+            
+            // 显示时间表格
+            document.getElementById('scheduleTableContainer').style.display = 'block';
+            document.getElementById('doctorSelectContainer').style.display = 'none';
+            
+            // 生成日期表头和时间槽
+            await loadScheduleTable();
+        }
+
+        async function loadScheduleTable() {
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            const today = new Date();
+            datesList = [];
+            
+            // 生成日期表头
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today.getTime() + i * 24 * 60 * 60 * 1000);
+                datesList.push(date);
+                
+                const th = document.getElementById(`date${i}`);
+                th.innerHTML = `
+                    <div>${weekdays[date.getDay()]}</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; margin: 0.25rem 0;">${date.getDate()}</div>
+                    <div style="font-size: 0.85rem; color: #999;">${date.getMonth() + 1}月</div>
+                `;
+            }
+            
+            // 加载每个时间槽的医生数量
+            for (let i = 0; i < 7; i++) {
+                const date = datesList[i];
+                const weekday = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][date.getDay()];
+                
+                try {
+                    const doctors = await apiRequest(`/doctors?dept_id=${bookingState.department.dept_id}`);
+                    
+                    let amCount = 0;
+                    let pmCount = 0;
+                    
+                    doctors.forEach(doctor => {
+                        if (doctor.schedule) {
+                            try {
+                                const schedule = JSON.parse(doctor.schedule);
+                                if (schedule[`${weekday}_am`]) amCount++;
+                                if (schedule[`${weekday}_pm`]) pmCount++;
+                            } catch (e) {
+                                amCount++;
+                                pmCount++;
+                            }
+                        } else {
+                            amCount++;
+                            pmCount++;
+                        }
+                    });
+                    
+                    const amCell = document.getElementById(`slot_${i}_am`);
+                    const pmCell = document.getElementById(`slot_${i}_pm`);
+                    
+                    if (amCount > 0) {
+                        amCell.innerHTML = `${amCount}位医生`;
+                        amCell.classList.remove('disabled');
+                    } else {
+                        amCell.innerHTML = '无';
+                        amCell.classList.add('disabled');
+                    }
+                    
+                    if (pmCount > 0) {
+                        pmCell.innerHTML = `${pmCount}位医生`;
+                        pmCell.classList.remove('disabled');
+                    } else {
+                        pmCell.innerHTML = '无';
+                        pmCell.classList.add('disabled');
+                    }
+                } catch (error) {
+                    console.error('加载时段信息失败:', error);
+                }
+            }
+        }
+
+        async function selectSlot(dateIndex, timeSlot) {
+            const cell = document.getElementById(`slot_${dateIndex}_${timeSlot}`);
+            if (cell.classList.contains('disabled')) {
+                return;
+            }
+            
+            bookingState.dateIndex = dateIndex;
+            // 使用本地日期格式，避免时区转换问题
+            const date = datesList[dateIndex];
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            bookingState.date = `${year}-${month}-${day}`;
+            bookingState.timeSlot = timeSlot;
+            
+            // 清除所有选中状态
+            document.querySelectorAll('.time-slot').forEach(td => {
+                td.classList.remove('selected');
+            });
+            cell.classList.add('selected');
+            
+            // 隐藏确认信息
+            document.getElementById('confirmInfo').style.display = 'none';
+            
+            // 显示医生选择
+            document.getElementById('doctorSelectContainer').style.display = 'block';
+            await loadDoctors();
+        }
+
+        async function loadDoctors() {
+            try {
+                const doctors = await apiRequest(
+                    `/doctors?dept_id=${bookingState.department.dept_id}&date=${bookingState.date}&time=${bookingState.timeSlot}`
+                );
+                
+                const container = document.getElementById('doctorCards');
+                container.innerHTML = '';
+                
+                // 隐藏确认信息
+                document.getElementById('confirmInfo').style.display = 'none';
+                
+                if (doctors.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">该时段暂无可用医生</p>';
+                    return;
+                }
+                
+                // 创建占位图SVG
+                const placeholderSvg = `data:image/svg+xml,%3Csvg width='120' height='160' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='120' height='160' fill='%23f8f9fa'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='14' fill='%23999' text-anchor='middle' dy='.3em'%3E医生照片%3C/text%3E%3C/svg%3E`;
+                
+                doctors.forEach(doctor => {
+                    const fee = doctor.registration_fee || 15;
+                    const photoUrl = doctor.photo ? `${API_BASE_URL.replace('/api', '')}/uploads/${doctor.photo}` : placeholderSvg;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'doctor-card';
+                    card.onclick = () => selectDoctor(doctor);
+                    card.innerHTML = `
+                        <img src="${photoUrl}" alt="${doctor.name}" class="doctor-avatar" onerror="this.src='${placeholderSvg}'">
+                        <div class="doctor-name">${doctor.name}</div>
+                        <div class="doctor-title">${doctor.title || '医师'}</div>
+                        <div class="doctor-fee">挂号费：¥${fee.toFixed(2)}</div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                showMessage('加载医生信息失败: ' + error.message, 'danger');
+            }
+        }
+
+        function selectDoctor(doctor) {
+            bookingState.doctor = doctor;
+            
+            // 更新UI
+            document.querySelectorAll('.doctor-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.doctor-card').classList.add('selected');
+            
+            // 显示具体时间选择
+            loadSpecificTimes();
+            document.getElementById('timeSelectContainer').style.display = 'block';
+            document.getElementById('confirmInfo').style.display = 'none';
+        }
+
+        function loadSpecificTimes() {
+            const select = document.getElementById('specificTimeSelect');
+            select.innerHTML = '<option value="">请选择具体时间</option>';
+            
+            // 获取当前中国时间
+            const now = new Date();
+            const selectedDate = datesList[bookingState.dateIndex];
+            const isToday = selectedDate.toDateString() === now.toDateString();
+            
+            // 根据上午/下午确定时间范围
+            let startHour, endHour;
+            if (bookingState.timeSlot === 'am') {
+                // 上午：00:00 - 11:30
+                startHour = 0;
+                endHour = 11;
+            } else {
+                // 下午：12:00 - 23:30
+                startHour = 12;
+                endHour = 23;
+            }
+            
+            // 生成时间选项
+            for (let hour = startHour; hour <= endHour; hour++) {
+                for (let minute of [0, 30]) {
+                    // 如果是今天，需要检查时间是否已过
+                    if (isToday) {
+                        const timeToCheck = new Date(selectedDate);
+                        timeToCheck.setHours(hour, minute, 0, 0);
+                        
+                        // 如果时间已过，跳过
+                        if (timeToCheck <= now) {
+                            continue;
+                        }
+                    }
+                    
+                    const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                    const option = document.createElement('option');
+                    option.value = timeStr;
+                    option.textContent = timeStr;
+                    select.appendChild(option);
+                }
+            }
+            
+            // 如果没有可选时间，显示提示
+            if (select.options.length === 1) {
+                select.innerHTML = '<option value="">该时段已过，无可选时间</option>';
+            }
+        }
+
+        function onSpecificTimeSelect() {
+            const timeSelect = document.getElementById('specificTimeSelect');
+            const selectedTime = timeSelect.value;
+            
+            if (!selectedTime) {
+                document.getElementById('confirmInfo').style.display = 'none';
+                return;
+            }
+            
+            bookingState.specificTime = selectedTime;
+            
+            // 显示确认信息
+            showConfirmInfo();
+        }
+
+        function showConfirmInfo() {
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            const dateObj = datesList[bookingState.dateIndex];
+            const dateDisplay = `${dateObj.getMonth() + 1}月${dateObj.getDate()}日 ${weekdays[dateObj.getDay()]}`;
+            const timeDisplay = bookingState.specificTime || (bookingState.timeSlot === 'am' ? '上午' : '下午');
+            
+            document.getElementById('confirmDept').textContent = bookingState.department.dept_name;
+            document.getElementById('confirmDate').textContent = dateDisplay;
+            document.getElementById('confirmTime').textContent = timeDisplay;
+            document.getElementById('confirmDoctor').textContent = `${bookingState.doctor.name} (${bookingState.doctor.title})`;
+            document.getElementById('confirmFee').textContent = `¥${bookingState.doctor.registration_fee.toFixed(2)}`;
+            
+            document.getElementById('confirmInfo').style.display = 'block';
+        }
+
+        function resetBooking() {
+            bookingState = {
+                department: null,
+                dateIndex: null,
+                date: null,
+                timeSlot: null,
+                doctor: null,
+                specificTime: null
+            };
+            
+            document.getElementById('deptSelect').value = '';
+            document.getElementById('scheduleTableContainer').style.display = 'none';
+            document.getElementById('doctorSelectContainer').style.display = 'none';
+            document.getElementById('timeSelectContainer').style.display = 'none';
+            document.querySelectorAll('.time-slot').forEach(td => {
+                td.classList.remove('selected');
+            });
+        }
+
+        async function confirmBooking() {
+            try {
+                // 生成预约时间 - 使用具体选择的时间
+                const specificTime = bookingState.specificTime || (bookingState.timeSlot === 'am' ? '09:00' : '15:00');
+                const regTime = `${bookingState.date} ${specificTime}:00`;
+                
+                await apiRequest('/registrations', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        doctor_id: bookingState.doctor.doctor_id,
+                        reg_time: regTime
+                    })
+                });
+                
+                showMessage('预约成功！', 'success');
+                resetBooking();
+                
+                // 切换到挂号记录页面
+                setTimeout(() => {
+                    showSection('myRegistrations');
+                }, 1500);
+            } catch (error) {
+                showMessage('预约失败: ' + error.message, 'danger');
+            }
+        }
+
+        let allRegistrations = [];
+        let filteredRegistrations = [];
+
+        async function loadRegistrations() {
+            const loading = document.getElementById('registrationsLoading');
+            const container = document.getElementById('registrationsContainer');
+            
+            loading.style.display = 'flex';
+            container.style.display = 'none';
+
+            try {
+                allRegistrations = await apiRequest('/patient/registrations');
+                filteredRegistrations = [...allRegistrations];
+                displayRegistrations(filteredRegistrations);
+                container.style.display = 'block';
+            } catch (error) {
+                showMessage('加载挂号记录失败: ' + error.message, 'danger');
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayRegistrations(registrations) {
+            const tbody = document.getElementById('registrationsTable');
+            const noRegistrations = document.getElementById('noRegistrations');
+            
+            tbody.innerHTML = '';
+            
+            if (registrations.length === 0) {
+                noRegistrations.style.display = 'block';
+            } else {
+                noRegistrations.style.display = 'none';
+                
+                registrations.forEach(reg => {
+                    const row = document.createElement('tr');
+                    const regTime = new Date(reg.reg_time);
+                    const canCancel = reg.status === 'registered' && regTime > new Date(Date.now() + 60 * 60 * 1000);
+                    
+                    row.innerHTML = `
+                        <td>${reg.reg_id}</td>
+                        <td>${reg.doctor_name}</td>
+                        <td>${reg.doctor_title || '-'}</td>
+                        <td>${reg.dept_name}</td>
+                        <td>${reg.dept_location || '-'}</td>
+                        <td>${formatDateTime(reg.reg_time)}</td>
+                        <td>¥${(reg.fee || 0).toFixed(2)}</td>
+                        <td><span class="status-badge status-${reg.status}">${getStatusText(reg.status)}</span></td>
+                        <td>
+                            ${canCancel ? 
+                                `<button class="btn btn-danger btn-sm" onclick="showCancelModal(${reg.reg_id})">取消挂号</button>` : 
+                                '<span style="color: #999;">不可取消</span>'
+                            }
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+        }
+
+        function searchRegistrations() {
+            const regId = document.getElementById('searchRegId').value.trim();
+            const doctor = document.getElementById('searchDoctor').value.trim().toLowerCase();
+            const dept = document.getElementById('searchDept').value.trim().toLowerCase();
+
+            filteredRegistrations = allRegistrations.filter(reg => {
+                const matchRegId = !regId || reg.reg_id.toString().includes(regId);
+                const matchDoctor = !doctor || reg.doctor_name.toLowerCase().includes(doctor);
+                const matchDept = !dept || reg.dept_name.toLowerCase().includes(dept);
+                return matchRegId && matchDoctor && matchDept;
+            });
+
+            displayRegistrations(filteredRegistrations);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchRegId').value = '';
+            document.getElementById('searchDoctor').value = '';
+            document.getElementById('searchDept').value = '';
+            filteredRegistrations = [...allRegistrations];
+            displayRegistrations(filteredRegistrations);
+        }
+
+        function showCancelModal(regId) {
+            currentCancelId = regId;
+            document.getElementById('cancelModal').style.display = 'block';
+        }
+
+        function closeCancelModal() {
+            document.getElementById('cancelModal').style.display = 'none';
+            currentCancelId = null;
+        }
+
+        async function confirmCancel() {
+            if (!currentCancelId) return;
+
+            try {
+                await apiRequest(`/registrations/${currentCancelId}/cancel`, {
+                    method: 'POST'
+                });
+
+                showMessage('挂号已取消', 'success');
+                closeCancelModal();
+                loadRegistrations();
+            } catch (error) {
+                showMessage('取消挂号失败: ' + error.message, 'danger');
+            }
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'registered': '已挂号',
+                'completed': '已就诊',
+                'cancelled': '已过号'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatDateTime(dateTimeStr) {
+            const date = new Date(dateTimeStr);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = `alert alert-${type} message`;
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // 移动端菜单控制
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+
+        // 点击导航项后自动关闭移动端菜单
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+
+        async function loadProfile() {
+            try {
+                const profile = await apiRequest('/patient/profile');
+                document.getElementById('profileName').value = profile.name || '';
+                document.getElementById('profilePhone').value = profile.phone || '';
+                document.getElementById('profilePassword').value = '';
+                document.getElementById('profilePasswordConfirm').value = '';
+                
+                // 显示累计挂号费
+                const totalFee = profile.total_fee || 0;
+                document.getElementById('totalFeeDisplay').textContent = `¥${totalFee.toFixed(2)}`;
+            } catch (error) {
+                showMessage('加载个人信息失败', 'danger');
+            }
+        }
+
+        async function updateProfile(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('profilePassword').value;
+            const passwordConfirm = document.getElementById('profilePasswordConfirm').value;
+            const phone = document.getElementById('profilePhone').value;
+            
+            if (password && password !== passwordConfirm) {
+                showMessage('两次输入的密码不一致', 'warning');
+                return;
+            }
+            
+            if (phone && !/^[0-9]{11}$/.test(phone)) {
+                showMessage('手机号码必须是11位数字', 'warning');
+                return;
+            }
+            
+            try {
+                const data = {
+                    name: document.getElementById('profileName').value,
+                    phone: phone
+                };
+                
+                if (password) {
+                    data.password = password;
+                }
+                
+                await apiRequest('/patient/profile', {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+                
+                showMessage('个人信息更新成功', 'success');
+                
+                // 更新侧边栏显示的用户名
+                document.getElementById('username').textContent = data.name;
+                localStorage.setItem('username', data.name);
+                
+                // 清空密码字段
+                document.getElementById('profilePassword').value = '';
+                document.getElementById('profilePasswordConfirm').value = '';
+            } catch (error) {
+                showMessage('更新失败: ' + error.message, 'danger');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            localStorage.removeItem('username');
+            localStorage.removeItem('user_id');
+            window.location.href = 'login.html';
+        }
+
+        // 手动刷新函数已移除
+
+        // 刷新指定section的数据
+        async function refreshSectionData(sectionName) {
+            try {
+                switch (sectionName) {
+                    case 'myRegistrations':
+                        await loadRegistrations();
+                        break;
+                    case 'booking':
+                        await loadDepartments();
+                        // 如果有选中的科室，也刷新医生列表
+                        const deptSelect = document.getElementById('deptSelect');
+                        if (deptSelect && deptSelect.value) {
+                            await onDeptSelect();
+                        }
+                        break;
+                    case 'profile':
+                        await loadProfile();
+                        break;
+                }
+                
+                // 显示刷新成功提示
+                showMessage('数据已刷新', 'success');
+            } catch (error) {
+                showMessage('刷新失败: ' + error.message, 'danger');
+            }
+        }
+
+        // 更新页面标题
+        function updatePageTitle(sectionName) {
+            const titles = {
+                'booking': '预约挂号',
+                'myRegistrations': '我的挂号',
+                'profile': '个人信息'
+            };
+            
+            const titleElement = document.getElementById('pageTitle');
+            if (titleElement && titles[sectionName]) {
+                titleElement.textContent = titles[sectionName];
+            }
+        }
+
+        // 扩展showSection函数以支持标题更新
+        const originalShowSection = window.showSection;
+        window.showSection = function(sectionName) {
+            if (originalShowSection) {
+                originalShowSection(sectionName);
+            }
+            
+            // 更新页面标题
+            updatePageTitle(sectionName);
+        };
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('cancelModal');
+            if (event.target === modal) {
+                closeCancelModal();
+            }
+        }
+    </script>
+</body>
+</html>

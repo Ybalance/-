@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 医院挂号系统</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <!-- 消息提示 -->
+    <div id="message" class="alert" style="display: none;"></div>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>医院挂号系统</h1>
+                <p>请选择您的身份并登录</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>选择身份</label>
+                    <div class="role-selector">
+                        <button type="button" class="role-option active" data-role="patient">患者</button>
+                        <button type="button" class="role-option" data-role="doctor">医生</button>
+                        <button type="button" class="role-option" data-role="admin">管理员</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">登录</button>
+            </form>
+
+            <div class="quick-login">
+                <h3>快速登录</h3>
+                <div style="margin-bottom: 0.5rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin', 'admin123', 'admin')">管理员</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin2', 'admin123', 'admin')">管理员2</button>
+                </div>
+                <div style="margin-bottom: 0.5rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('doctor1', 'doctor123', 'doctor')">李医生</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('doctor2', 'doctor123', 'doctor')">王医生</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('doctor3', 'doctor123', 'doctor')">赵医生</button>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('patient1', 'patient123', 'patient')">张三</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('patient2', 'patient123', 'patient')">李四</button>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('patient3', 'patient123', 'patient')">王五</button>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 1rem;">
+                <p>还没有账户？<a href="register.html">立即注册</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/config.js"></script>
+    <script src="assets/login.js"></script>
+</body>
+</html>

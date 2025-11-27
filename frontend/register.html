@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 医院挂号系统</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <!-- 消息提示 -->
+    <div id="message" class="alert" style="display: none;"></div>
+    
+    <div class="login-container">
+        <div class="login-card" style="max-width: 500px;">
+            <div class="login-header">
+                <h1>用户注册</h1>
+                <p>创建新账户</p>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label>注册身份</label>
+                    <div class="role-selector">
+                        <button type="button" class="role-option active" data-role="patient">患者</button>
+                        <button type="button" class="role-option" data-role="doctor">医生</button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="username">用户名 *</label>
+                        <input type="text" id="username" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">密码 *</label>
+                        <input type="password" id="password" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">真实姓名 *</label>
+                    <input type="text" id="name" class="form-control" required>
+                </div>
+
+                <!-- Patient specific fields -->
+                <div id="patientFields">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone">手机号码</label>
+                            <input type="tel" id="phone" class="form-control" pattern="[0-9]{11}">
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">性别</label>
+                            <select id="gender" class="form-control">
+                                <option value="">请选择</option>
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="birthday">生日</label>
+                        <input type="date" id="birthday" class="form-control">
+                    </div>
+                </div>
+
+                <!-- Doctor specific fields -->
+                <div id="doctorFields" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="title">职称 *</label>
+                            <select id="title" class="form-control">
+                                <option value="">请选择职称</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="department">所属科室 *</label>
+                            <select id="department" class="form-control">
+                                <option value="">请选择科室</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">注册</button>
+            </form>
+
+            <div style="text-align: center; margin-top: 1rem;">
+                <p>已有账户？<a href="login.html">立即登录</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleOptions = document.querySelectorAll('.role-option');
+            const registerForm = document.getElementById('registerForm');
+            const patientFields = document.getElementById('patientFields');
+            const doctorFields = document.getElementById('doctorFields');
+            const departmentSelect = document.getElementById('department');
+            const messageDiv = document.getElementById('message');
+            let selectedRole = 'patient';
+
+            // Load departments and titles
+            loadDepartments();
+            loadTitles();
+
+            // Role selection
+            roleOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    roleOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedRole = this.dataset.role;
+                    
+                    if (selectedRole === 'doctor') {
+                        patientFields.style.display = 'none';
+                        doctorFields.style.display = 'block';
+                        document.getElementById('department').required = true;
+                    } else {
+                        patientFields.style.display = 'block';
+                        doctorFields.style.display = 'none';
+                        document.getElementById('department').required = false;
+                    }
+                });
+            });
+
+            // Register form submission
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value,
+                    role: selectedRole,
+                    name: document.getElementById('name').value,
+                    phone: document.getElementById('phone').value,
+                    gender: document.getElementById('gender').value,
+                    birthday: document.getElementById('birthday').value
+                };
+
+                if (selectedRole === 'doctor') {
+                    formData.title_id = parseInt(document.getElementById('title').value);
+                    formData.dept_id = parseInt(document.getElementById('department').value);
+                    
+                    if (!formData.title_id) {
+                        showMessage('请选择职称', 'danger');
+                        return;
+                    }
+                    
+                    if (!formData.dept_id) {
+                        showMessage('请选择科室', 'danger');
+                        return;
+                    }
+                }
+
+                if (!formData.username || !formData.password || !formData.name) {
+                    showMessage('请填写必填字段', 'danger');
+                    return;
+                }
+
+                try {
+                    showMessage('正在注册...', 'info');
+                    
+                    const response = await fetch(getApiUrl('/signup'), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showMessage('注册成功！正在跳转到登录页面...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    } else {
+                        showMessage(data.error || '注册失败', 'danger');
+                    }
+                } catch (error) {
+                    console.error('Register error:', error);
+                    showMessage('网络错误，请检查后端服务是否启动', 'danger');
+                }
+            });
+
+            async function loadDepartments() {
+                try {
+                    const departments = await apiRequest('/departments');
+                    departmentSelect.innerHTML = '<option value="">请选择科室</option>';
+                    departments.forEach(dept => {
+                        const option = document.createElement('option');
+                        option.value = dept.dept_id;
+                        option.textContent = dept.dept_name;
+                        departmentSelect.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Failed to load departments:', error);
+                }
+            }
+
+            async function loadTitles() {
+                try {
+                    const response = await fetch(API_BASE_URL + '/titles/public');
+                    const data = await response.json();
+                    
+                    if (data.success && data.titles) {
+                        const titleSelect = document.getElementById('title');
+                        titleSelect.innerHTML = '<option value="">请选择职称</option>';
+                        
+                        data.titles.forEach(title => {
+                            const option = document.createElement('option');
+                            option.value = title.title_id;
+                            option.textContent = title.title_name;
+                            titleSelect.appendChild(option);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Failed to load titles:', error);
+                }
+            }
+
+            function showMessage(message, type) {
+                messageDiv.className = `alert alert-${type}`;
+                messageDiv.textContent = message;
+                messageDiv.style.display = 'block';
+                
+                if (type === 'success') {
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 3000);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
